@@ -1,1 +1,4 @@
-this is for Opearting system lecture term project that developed solution of scheduling policy to code consider scenario
+python = 3.9.16
+#brew install qt
+#qt version : v 5.15.2
+#PyQt : v5.15.7
