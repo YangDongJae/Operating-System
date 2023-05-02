@@ -7,6 +7,8 @@ class Process:
         self.complexity = complexity
         self.model = model
         self.burst_time = self.calculate_bt()
+        self.start_time = None
+        self.finish_time = None
 
     def calculate_bt(self):
         base_time = random.randint(1, 45)
@@ -40,8 +42,16 @@ def schedule_processes(processes, cores, time_quantum_table):
     queue = deque(processes)
     finished_processes = []
 
+    current_time = 0
+    total_processes = len(processes)
+    completed_processes = 0
+
     while queue:
         current_process = queue.popleft()
+
+        if current_process.start_time is None:
+            current_process.start_time = current_time
+
         at, bt, complexity, model = current_process.arrival_time, current_process.burst_time, current_process.complexity, current_process.model
 
         if bt == 1 or complexity <= 5 or sum(core.speed for core in p_cores) == 3 and e_core.speed == 0:
@@ -55,12 +65,24 @@ def schedule_processes(processes, cores, time_quantum_table):
             min_p_core.speed += time_quantum
 
         if remaining_bt <= 0 or bt >= 30:
+            current_process.finish_time = current_time + time_quantum
             finished_processes.append(current_process)
+            completed_processes += 1
+
+            # Calculate WT, TT, NTT
+            wt = current_process.start_time - current_process.arrival_time
+            tt = current_process.finish_time - current_process.arrival_time
+            ntt = tt / bt
+
+            print(f"Completed process {completed_processes}/{total_processes}")
+            print(f"Process Name: {model}, AT: {at}, BT: {bt}, WT: {wt}, TT: {tt}, NTT: {ntt}\n")
         else:
             current_process.burst_time = remaining_bt
             queue.append(current_process)
 
-    return finished_processes
+        current_time += time_quantum
+
+    return finished_processes, current_time
 
 def main():
     processes = [
@@ -78,10 +100,18 @@ def main():
     ]
 
     time_quantum_table = create_time_quantum_table()
-    finished_processes = schedule_processes(processes, cores, time_quantum_table)
-    
-    for process in finished_processes:
-        print(f"Arrival Time: {process.arrival_time}, Burst Time: {process.burst_time}, Complexity: {process.complexity}, Model: {process.model}")
+    finished_processes, total_time = schedule_processes(processes, cores, time_quantum_table)
+
+    total_power_p_cores = sum(core.power_usage * core.speed for core in cores[:3]) * total_time
+    total_power_e_core = cores[3].power_usage * cores[3].speed * total_time
+    total_power = total_power_p_cores + total_power_e_core
+    average_response_time = sum((process.finish_time - process.arrival_time) for process in finished_processes) / len(processes)
+
+    print(f"Total BT Time: {total_time}")
+    print(f"Average Response Time: {average_response_time}")
+    print(f"P-cores Total Power Usage: {total_power_p_cores}")
+    print(f"E-core Total Power Usage: {total_power_e_core}")
+    print(f"Total Power Usage: {total_power}")
 
 if __name__ == "__main__":
     main()
