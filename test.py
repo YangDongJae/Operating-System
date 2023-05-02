@@ -1,17 +1,26 @@
 import random
 from collections import deque
 
-# 프로세스 실행 시간을 계산하는 수식
-# 프로세스 실행 시간을 계산하는 수식
-def calculate_bt(complexity, model):
-    base_time = random.randint(1, 45)
-    if model == "GPT4":
-        return min(base_time + (complexity * 2), 45)
-    else:
-        return min(base_time + complexity, 45)
+class Process:
+    def __init__(self, arrival_time, complexity, model):
+        self.arrival_time = arrival_time
+        self.complexity = complexity
+        self.model = model
+        self.burst_time = self.calculate_bt()
 
+    def calculate_bt(self):
+        base_time = random.randint(1, 45)
+        if self.model == "GPT4":
+            return min(base_time + (self.complexity * 2), 45)
+        else:
+            return min(base_time + self.complexity, 45)
 
-# Time Quantum Table을 생성
+class Core:
+    def __init__(self, speed, power_usage, startup_power):
+        self.speed = speed
+        self.power_usage = power_usage
+        self.startup_power = startup_power
+
 def create_time_quantum_table():
     table = {}
     for i in range(1, 46):
@@ -25,47 +34,54 @@ def create_time_quantum_table():
             table[i] = 4
     return table
 
-# 프로세스 스케줄링 알고리즘 구현
-def schedule_processes(processes, time_quantum_table):
-    p_cores = [0, 0, 0]
-    e_core = 0
+def schedule_processes(processes, cores, time_quantum_table):
+    p_cores = cores[:3]
+    e_core = cores[3]
     queue = deque(processes)
     finished_processes = []
 
     while queue:
         current_process = queue.popleft()
-        at, bt, complexity, model = current_process
+        at, bt, complexity, model = current_process.arrival_time, current_process.burst_time, current_process.complexity, current_process.model
 
-        # 프로세서 할당 정책 적용
-        if bt == 1 or complexity <= 5 or sum(p_cores) == 3 and e_core == 0:
+        if bt == 1 or complexity <= 5 or sum(core.speed for core in p_cores) == 3 and e_core.speed == 0:
             time_quantum = 1
             remaining_bt = bt - time_quantum
-            e_core += time_quantum
+            e_core.speed += time_quantum
         else:
             time_quantum = min(time_quantum_table[bt], 2)
             remaining_bt = bt - time_quantum
-            min_p_core_idx = p_cores.index(min(p_cores))
-            p_cores[min_p_core_idx] += time_quantum
+            min_p_core = min(p_cores, key=lambda x: x.speed)
+            min_p_core.speed += time_quantum
 
-        # 프로세스 종료 여부 확인 및 처리
         if remaining_bt <= 0 or bt >= 30:
             finished_processes.append(current_process)
         else:
-            queue.append((at, remaining_bt, complexity, model))
+            current_process.burst_time = remaining_bt
+            queue.append(current_process)
 
     return finished_processes
 
-# 예제 프로세스 생성
-processes = [
-    (0, calculate_bt(5, "GPT4"), 5, "GPT4"),
-    (1, calculate_bt(10, "Default GPT 3.5"), 10, "Default GPT 3.5"),
-    (2, calculate_bt(15, "Legacy GPT 3.5"), 15, "Legacy GPT 3.5"),
-    (3, calculate_bt(20, "GPT4"), 20, "GPT4"),
-]
+def main():
+    processes = [
+        Process(0, 5, "GPT4"),
+        Process(1, 10, "Default GPT 3.5"),
+        Process(2, 15, "Legacy GPT 3.5"),
+        Process(3, 20, "GPT4"),
+    ]
 
-# Time Quantum Table 생성
-time_quantum_table = create_time_quantum_table()
+    cores = [
+        Core(2, 3, 0.5),
+        Core(2, 3, 0.5),
+        Core(2, 3, 0.5),
+        Core(1, 1, 0.1),
+    ]
 
-# 프로세스 스케줄링
-finished_processes = schedule_processes(processes, time_quantum_table)
-print(finished_processes)
+    time_quantum_table = create_time_quantum_table()
+    finished_processes = schedule_processes(processes, cores, time_quantum_table)
+    
+    for process in finished_processes:
+        print(f"Arrival Time: {process.arrival_time}, Burst Time: {process.burst_time}, Complexity: {process.complexity}, Model: {process.model}")
+
+if __name__ == "__main__":
+    main()
