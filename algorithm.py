@@ -141,7 +141,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     # // 프로세스 생성시 random.randint 말고 순차적용하면 삭제해도 무방
                     if current_time >= self.processes[0].arrival_time:
                         process = self.processes.pop(0)
-                        process.waiting_time += current_time - process.last_active_time
+                        process.waiting_time += current_time - process.last_active_time # modified --> ready queue에 있었던 시간으로 변경
                         processor.assign_process(process)
                         self.update_quantum(process.burst_time)
                     #//
@@ -152,27 +152,29 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     for _ in range(self.quantum):
                         processor.execute()  # 프로세서 실행
                         current_time += 1  # 시간 증가
-                        if processor.current_process is None:
+                        if processor.current_process is None or any(processor.current_process.arrival_time == p.arrival_time for p in self.processes):
                             break
 
                     # 프로세서의 현재 프로세스가 남아있는 경우 다시 대기열에 추가
-                    if processor.current_process is not None:
+                    if processor.current_process is not None and processor.current_process.arrival_time < current_time:
                         processor.current_process.last_active_time = current_time
                         self.processes.append(processor.current_process)
                         processor.current_process = None
                     # 프로세서의 현재 프로세스가 완료된 경우 completed_processes에 추가
-                    else:
-                        completed_process = process
+                    elif processor.current_process is not None and processor.current_process.burst_time == 0:
+                        completed_process = processor.current_process
                         completed_process.turnaround_time = current_time - completed_process.arrival_time + completed_process.waiting_time
                         if completed_process.initial_burst_time != 0:
                             completed_process.normalized_turnaround_time = completed_process.turnaround_time / completed_process.initial_burst_time
                         else:
                             completed_process.normalized_turnaround_time = completed_process.turnaround_time
                         self.completed_processes.append(completed_process)
+                        processor.current_process = None
 
             # 모든 프로세서가 비어있고 대기열에 프로세스가 남아있는 경우 현재 시간을 증가시킴
             if not any(processor.current_process for processor in self.processors) and self.processes:
                 current_time += 1
+
 
 
     def update_quantum(self, remaining_bt: int):
@@ -181,10 +183,13 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
             if lower <= remaining_bt <= upper:
                 self.quantum = quantum
                 break
-
+            
     def calculate_avg_ntt(self):
-        total_ntt = sum([process.normalized_turnaround_time for process in self.completed_processes])
+        if len(self.completed_processes) == 0:
+            return 0
+        total_ntt = sum(process.normalized_turnaround_time for process in self.completed_processes)
         return total_ntt / len(self.completed_processes)
+
 
 
     def print_results(self):
