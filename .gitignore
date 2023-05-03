@@ -1,2 +1,4 @@
 *.docx
 *.txt
+*.ipynb
+test.py
