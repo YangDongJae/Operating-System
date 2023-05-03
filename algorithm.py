@@ -56,6 +56,12 @@ class Processor:
             # 버스트 시간이 0 이하인 경우 프로세스 종료
             if self.current_process.burst_time <= 0:
                 self.current_process = None
+            
+            # BT시간이 30초 이상이면서, 프로세서에서 30초이상 작업된 프로세스 강제종료
+            elif self.current_process.initial_burst_time >= 30 and (self.current_process.initial_burst_time - self.current_process.burst_time) >= 30:
+                print(f"Process {self.current_process.process_id} has been forcibly terminated.")
+                self.current_process = None
+
 
     def calculate_power_usage(self):
         """
@@ -132,11 +138,13 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
             for processor in self.processors:
                 if processor.current_process is None and self.processes:
                     # 현재 시간이 프로세스의 arrival_time보다 크거나 같은 경우에만 프로세스 할당
+                    # // 프로세스 생성시 random.randint 말고 순차적용하면 삭제해도 무방
                     if current_time >= self.processes[0].arrival_time:
                         process = self.processes.pop(0)
                         process.waiting_time += current_time - process.last_active_time
                         processor.assign_process(process)
                         self.update_quantum(process.burst_time)
+                    #//
 
                 # 프로세서에 프로세스가 할당된 경우 실행
                 if processor.current_process is not None:
@@ -174,23 +182,30 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                 self.quantum = quantum
                 break
 
-    def calculate_avg_response_time(self):
-        total_response_time = sum([process.waiting_time for process in self.processes])
-        return total_response_time / len(self.processes)
+    def calculate_avg_ntt(self):
+        total_ntt = sum([process.normalized_turnaround_time for process in self.completed_processes])
+        return total_ntt / len(self.completed_processes)
+
 
     def print_results(self):
         # 결과 헤더 출력
-        print("Process ID | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Normalized Turnaround Time | Completion Time")
+        print("Process ID | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Normalized Turnaround Time | Completion Time ")
         # 각 완료된 프로세스에 대한 정보 출력
         for process in self.completed_processes:
             completion_time = process.arrival_time + process.turnaround_time
             print(f"{process.process_id} | {process.arrival_time} | {process.initial_burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.normalized_turnaround_time} | {completion_time}")
-        
+
+        #AVG NTT 출력
+        avg_ntt = self.calculate_avg_ntt()
+        print(f"Average NTT : {avg_ntt} time")
         # P 코어와 E 코어의 전력 사용량을 계산하여 출력
         p_cores_power_usage = sum([processor.total_power_usage for processor in self.processors if processor.core_type == "P"])
         e_cores_power_usage = sum([processor.total_power_usage for processor in self.processors if processor.core_type == "E"])
-        print(f"P cores total power usage: {p_cores_power_usage} units")
-        print(f"E cores total power usage: {e_cores_power_usage} units")
+        print(f"P cores total power usage: {p_cores_power_usage} W")
+        print(f"E cores total power usage: {e_cores_power_usage} W")
+        
+        
+
 
 
 class MainProgram:
@@ -231,7 +246,7 @@ class MainProgram:
         self.scheduler.print_results()
 
 def main():
-    N = 10  # 프로세스 개수
+    N = 50  # 프로세스 개수
     P = 4  # 프로세서 개수
 
     main_program = MainProgram(N, P)
