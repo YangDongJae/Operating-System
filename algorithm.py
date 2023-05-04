@@ -40,10 +40,11 @@ class Processor:
     def assign_process(self, process: Process):
         # 현재 프로세스를 할당합니다.
         self.current_process = process
+        self.power_on = True # 변경사항 : 프로세스가 프로세서에 할당되면 프로세서 상태를 True로 변경
 
     def execute(self):
         # 현재 프로세스가 있는 경우
-        if self.current_process is not None:
+        if self.current_process.burst_time is not None:
             self.calculate_power_usage()  # 프로세스 실행 전 전력 사용량 계산 호출
             # 코어 유형에 따른 버스트 시간 감소
             if self.core_type == "P":
@@ -52,10 +53,11 @@ class Processor:
                 self.current_process.burst_time -= 1
             else:
                 raise ValueError("Invalid core type")
-
+        
             # 버스트 시간이 0 이하인 경우 프로세스 종료
             if self.current_process.burst_time <= 0:
                 self.current_process = None
+                self.power_on = False # 변경사항 : 프로세서 BT 즉 프로세서를 할당받은 프로세스의 작업이 모두 끝나면 프로세서 전원 상태 끔
 
             # BT시간이 30초 이상이면서, 프로세서에서 30초이상 작업된 프로세스 강제종료
             elif self.current_process.initial_burst_time >= 30 and (
@@ -75,8 +77,6 @@ class Processor:
                 self.total_power_usage += 0.1
             else:
                 raise ValueError("Invalid core type")
-
-            self.power_on = True
 
         if self.current_process is not None:
             # 코어 유형에 따른 전력 사용량 계산
@@ -143,12 +143,24 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     # 현재 시간이 프로세스의 arrival_time보다 크거나 같은 경우에만 프로세스 할당
                         if self.processes[0].arrival_time <= current_time:  # 수정된 부분: 프로세스 할당 조건 변경
                             process = self.processes.pop(0)
+                            # 수정된 부분: 프로세스 할당 정책 변경
+                            if process.burst_time >= 1 and process.burst_time <= 5 and self.processors[-1].core_type == "E":
+                                self.processors[-1].assign_process(process)
+                            else:
+                                #label : 프로세서 할당 영역
+                                processor.assign_process(process)                            
 
                         processor.assign_process(process)
                         self.update_quantum(process.burst_time)
 
                 # 프로세서에 프로세스가 할당된 경우 실행
                 if processor.current_process is not None:
+                    print(f"----PID : {processor.current_process.process_id} , AT : {processor.current_process.arrival_time}----")
+                    print(f"processor ID : {self.processors[0].processor_id}\nprocessor type : {self.processors[0].core_type}\nprocessor State : {self.processors[0].power_on}")
+                    print(f"processor ID : {self.processors[1].processor_id}\nprocessor type : {self.processors[1].core_type}\nprocessor State : {self.processors[1].power_on}")
+                    print(f"processor ID : {self.processors[2].processor_id}\nprocessor type : {self.processors[2].core_type}\nprocessor State : {self.processors[2].power_on}")
+                    print(f"processor ID : {self.processors[3].processor_id}\nprocessor type : {self.processors[3].core_type}\nprocessor State : {self.processors[3].power_on}")
+                    print("------------------------")
                     remaining_bt = processor.current_process.burst_time
                     for _ in range(self.quantum):
                         processor.execute()  # 프로세서 실행
