@@ -40,6 +40,7 @@ class Processor:
     def assign_process(self, process: Process):
         # 현재 프로세스를 할당합니다.
         self.current_process = process
+        self.power_on = True # 변경사항 : 프로세스가 프로세서에 할당되면 프로세서 상태를 True로 변경
 
     def execute(self):
         # 현재 프로세스가 있는 경우
@@ -143,12 +144,24 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     # 현재 시간이 프로세스의 arrival_time보다 크거나 같은 경우에만 프로세스 할당
                         if self.processes[0].arrival_time <= current_time:  # 수정된 부분: 프로세스 할당 조건 변경
                             process = self.processes.pop(0)
+                            # 수정된 부분: 프로세스 할당 정책 변경
+                            if process.burst_time >= 1 and process.burst_time <= 5 and self.processors[-1].core_type == "E":
+                                self.processors[-1].assign_process(process)
+                            else:
+                                #label : 프로세서 할당 영역
+                                processor.assign_process(process)                            
 
                         processor.assign_process(process)
                         self.update_quantum(process.burst_time)
 
                 # 프로세서에 프로세스가 할당된 경우 실행
                 if processor.current_process is not None:
+                    print(f"----PID : {processor.current_process.process_id} , AT : {processor.current_process.arrival_time}----")
+                    print(f"processor ID : {self.processors[0].processor_id}\nprocessor type : {self.processors[0].core_type}\nprocessor State : {self.processors[0].power_on}")
+                    print(f"processor ID : {self.processors[1].processor_id}\nprocessor type : {self.processors[1].core_type}\nprocessor State : {self.processors[1].power_on}")
+                    print(f"processor ID : {self.processors[2].processor_id}\nprocessor type : {self.processors[2].core_type}\nprocessor State : {self.processors[2].power_on}")
+                    print(f"processor ID : {self.processors[3].processor_id}\nprocessor type : {self.processors[3].core_type}\nprocessor State : {self.processors[3].power_on}")
+                    print("------------------------")
                     remaining_bt = processor.current_process.burst_time
                     for _ in range(self.quantum):
                         processor.execute()  # 프로세서 실행
