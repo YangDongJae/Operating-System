@@ -143,15 +143,19 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     # 현재 시간이 프로세스의 arrival_time보다 크거나 같은 경우에만 프로세스 할당
                         if self.processes[0].arrival_time <= current_time:  # 수정된 부분: 프로세스 할당 조건 변경
                             process = self.processes.pop(0)
-                            # 수정된 부분: 프로세스 할당 정책 변경
-                            if process.burst_time >= 1 and process.burst_time <= 5 and self.processors[-1].core_type == "E":
-                                self.processors[-1].assign_process(process)
-                            else:
-                                #label : 프로세서 할당 영역
-                                processor.assign_process(process)                            
 
-                        processor.assign_process(process)
-                        self.update_quantum(process.burst_time)
+                            # 수정된 부분: 프로세스 할당 정책 변경
+                            condition1 = process.burst_time == 1
+                            condition2 = process.complexity <= 4
+                            condition3 = all(proc.is_busy() for proc in self.processors if proc.core_type == "P") and not any(
+                                p.burst_time == 1 or p.complexity <= 4 for p in self.processes)
+
+                            if processor.core_type == "E" and (condition1 or condition2 or condition3):
+                                processor.assign_process(process)
+                            elif processor.core_type == "P" and not (condition1 or condition2):
+                                processor.assign_process(process)
+
+                            self.update_quantum(process.burst_time)
 
                 # 프로세서에 프로세스가 할당된 경우 실행
                 if processor.current_process is not None:
@@ -227,8 +231,6 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         
         
 
-
-
 class MainProgram:
     def __init__(self, N: int, P: int):
         self.N = N  # 프로세스 개수
@@ -238,21 +240,20 @@ class MainProgram:
 
     def create_processes(self):
         # 각 프로세스를 생성하고 프로세스 목록에 추가
-        AT_TIMES = list(range(0,100))
+        AT_TIMES = list(range(0,25))
         BT_ITEMS = [14,18,30]
         for i in range(self.N):
             process_id = i + 1
             arrival_time = AT_TIMES.pop(0)
-            complexity = random.randint(1, 30)
+            complexity = random.randint(1, 20)
             gpt_model = random.choice(["GPT4", "Default GPT 3.5", "Legacy GPT 3.5"])
 
             if gpt_model == "GPT4":
-                gpt_multiplier = 1.5
+                gpt_multiplier = 2
             else:
                 gpt_multiplier = 1
 
             burst_time = int(complexity * gpt_multiplier)
-            burst_time = max(1, min(burst_time, 45))
             # burst_time = BT_ITEMS.pop(0)
 
             process = Process(process_id, arrival_time, burst_time, complexity, gpt_model)
@@ -270,7 +271,7 @@ class MainProgram:
         self.scheduler.print_results()
 
 def main():
-    N = 3  # 프로세스 개수
+    N = 4  # 프로세스 개수
     P = 4  # 프로세서 개수
 
     main_program = MainProgram(N, P)
