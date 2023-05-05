@@ -40,7 +40,6 @@ class Processor:
     def assign_process(self, process: Process):
         # 현재 프로세스를 할당합니다.
         self.current_process = process
-        self.power_on = True # 변경사항 : 프로세스가 프로세서에 할당되면 프로세서 상태를 True로 변경
 
     def execute(self):
         # 현재 프로세스가 있는 경우
@@ -128,7 +127,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         self.quantum = 0
         self.completed_processes = []  # 안료된 프로세스 목록 초기화
 
-    def schedule(self):
+    def schedule(self, waiting_queue: List[Process]):  # 대기열을 인자로 받음
         current_time = 0  # 현재 시간 초기화
         self.completed_processes = []  # 완료된 프로세스 목록 초기화
 
@@ -144,23 +143,48 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                         if self.processes[0].arrival_time <= current_time:  # 수정된 부분: 프로세스 할당 조건 변경
                             process = self.processes.pop(0)
                             # 수정된 부분: 프로세스 할당 정책 변경
-                            # 프로세스 할당 정책 개발해야하는 부분으로 추정!#
-                            if process.burst_time >= 1 and process.burst_time <= 5 and self.processors[-1].core_type == "E":
+                            # P코어 할당
+                            if process.burst_time > 5:
+                                for processor in self.processors:
+                                    if processor.is_busy == False:
+                                        available_processor = processor
+                                        processor.calculate_power_usage()
+                                        processor.power_on = True                                        
+
+                            # E코어 할당
+                            elif process.burst_time >= 1 and process.burst_time <= 5 and self.processors[-1].core_type == "E":
+                                # 변경사항 : E 프로세서 할당 시 전력 계산
+                                if self.processors[-1].power_on == False:
+                                    self.processors[-1].calculate_power_usage()
+                                    self.processors[-1].power_on = True
+                                elif self.processors[-1].power_on == True:
+                                    self.processors[-1].calculate_power_usage()
+                                #프로세스에 E코어 할당
                                 self.processors[-1].assign_process(process)
                             else:
-                                #label : 프로세서 할당 영역
-                                processor.assign_process(process)                            
-
-                        processor.assign_process(process)
+                                waiting_queue.append(process)
+                                
+                                
+            if waiting_queue:
+                for idx, process in enumerate(waiting_queue):
+                    available_processor = None
+                    for processor in self.processors[:-1]:
+                        if not processor.is_busy():
+                            available_processor = processor
+                            break
+                    if available_processor:
+                        available_processor.assign_process(waiting_queue.pop(idx))
                         self.update_quantum(process.burst_time)
+                        break                                       
+                        
 
                 # 프로세서에 프로세스가 할당된 경우 실행
                 if processor.current_process is not None:
                     print(f"----PID : {processor.current_process.process_id} , AT : {processor.current_process.arrival_time}----")
-                    print(f"processor ID : {self.processors[0].processor_id}\nprocessor type : {self.processors[0].core_type}\nprocessor State : {self.processors[0].power_on}")
-                    print(f"processor ID : {self.processors[1].processor_id}\nprocessor type : {self.processors[1].core_type}\nprocessor State : {self.processors[1].power_on}")
-                    print(f"processor ID : {self.processors[2].processor_id}\nprocessor type : {self.processors[2].core_type}\nprocessor State : {self.processors[2].power_on}")
-                    print(f"processor ID : {self.processors[3].processor_id}\nprocessor type : {self.processors[3].core_type}\nprocessor State : {self.processors[3].power_on}")
+                    print(f"processor ID : {self.processors[0].processor_id}\nprocessor type : {self.processors[0].core_type}\nprocessor State : {self.processors[0].power_on}\n Processor total usage : {self.processors[0].total_power_usage}\n")
+                    print(f"processor ID : {self.processors[1].processor_id}\nprocessor type : {self.processors[1].core_type}\nprocessor State : {self.processors[1].power_on}\n Processor total usage : {self.processors[1].total_power_usage}\n")
+                    print(f"processor ID : {self.processors[2].processor_id}\nprocessor type : {self.processors[2].core_type}\nprocessor State : {self.processors[2].power_on}\n Processor total usage : {self.processors[2].total_power_usage}\n")
+                    print(f"processor ID : {self.processors[3].processor_id}\nprocessor type : {self.processors[3].core_type}\nprocessor State : {self.processors[3].power_on}\n Processor total usage : {self.processors[3].total_power_usage}")
                     print("------------------------")
                     remaining_bt = processor.current_process.burst_time
                     for _ in range(self.quantum):
@@ -236,6 +260,7 @@ class MainProgram:
         self.P = P  # 프로세서 개수
         self.processes = []  # 프로세스 목록 초기화
         self.scheduler = RoundRobinAlgorithm(P)  # 라운드 로빈 스케줄러 생성
+        self.waiting_queue = []  # 대기열 초기화
 
     def create_processes(self):
         # 각 프로세스를 생성하고 프로세스 목록에 추가
@@ -264,7 +289,7 @@ class MainProgram:
         for process in self.processes:
             self.scheduler.add_process(process)
 
-        self.scheduler.schedule()
+        self.scheduler.schedule(self.waiting_queue)  # 대기열을 인자로 전달
 
     def print_final_results(self):
         # 스케줄러를 통해 최종 결과 출력
