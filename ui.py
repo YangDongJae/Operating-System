@@ -7,7 +7,7 @@ from PyQt5.QtCore import QEvent
 from PyQt5.QtCore import Qt
 from PyQt5 import uic
 
-form_class = uic.loadUiType("ui\os.ui")[0]
+form_class = uic.loadUiType("os.ui")[0]
 
 
 class Process:
@@ -58,7 +58,7 @@ class OS_Scheduler(QMainWindow, form_class):
 
         self.setupUi(self)
         self.setWindowTitle('OS Scheduler')
-        self.setWindowIcon(QIcon('ui/logo/logo.png'))
+        self.setWindowIcon(QIcon('logo/logo.png'))
         self.lb_core.setText(
             f"현재 코어: P-Core : {self.core.count(1)}개, E-Core : {self.core.count(2)}개")
         self.move(300, 300)
@@ -233,11 +233,11 @@ class OS_Scheduler(QMainWindow, form_class):
         if pushbutton.isChecked():  # 버튼을 누를 때
             subject = getattr(self, 'pb_model2') if flag == 1 else getattr(
                 self, 'pb_model1')
-            subject.setIcon(QIcon('ui/logo/g_gpt-icon.png'))
+            subject.setIcon(QIcon('logo/g_gpt-icon.png'))
             subject.setChecked(False)
-            pushbutton.setIcon(QIcon('ui/logo/gpt-icon.png'))
+            pushbutton.setIcon(QIcon('logo/gpt-icon.png'))
         else:  # 버튼을 해제할 때
-            pushbutton.setIcon(QIcon('ui/logo/g_gpt-icon.png'))
+            pushbutton.setIcon(QIcon('logo/g_gpt-icon.png'))
 
 
 if __name__ == "__main__":
