@@ -161,6 +161,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
     def schedule(self):  # 대기열을 인자로 받지 않음
         current_time = 0  # 현재 시간 초기화
         self.completed_processes = []  # 완료된 프로세스 목록 초기화
+                
 
         # 프로세스 정렬: arrival_time이 작은 순서대로 정렬
         self.processes.sort(key=lambda x: x.arrival_time)
@@ -223,7 +224,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                         print(f'REMAIN BT : {processor.current_process.burst_time}')
                         print(f'Processing TIME : {processor.current_time}')
                         
-                        if remaining_quantum == 0:
+                        if remaining_quantum == 0 or processor.current_process.burst_time <= 0:
                             if processor.current_process is not None and processor.current_process.burst_time > 0:
                                 if processor.current_process not in self.processes:
                                     self.processes.append(processor.current_process)
@@ -234,6 +235,10 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                                 print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬")
                             
                             elif processor.current_process is not None and processor.current_process.burst_time <= 0:
+                                
+                                'processor.current_process 초기화 위치 선정 해야함'
+                                
+                                #'processor.current_process 초기화 위치 선정 해야함' 여기로
                                 completed_process = processor.current_process
                                 processor.current_process = None
                                                     
@@ -250,6 +255,8 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                                 else:
                                     completed_process.normalized_turnaround_time = completed_process.turnaround_time
                                 self.completed_processes.append(completed_process)
+                                
+                                #'processor.current_process 초기화 위치 선정 해야함' 아님 여기로
                     
                     processor.power_on = False
                     print(f'\n\n Turn off {processor.core_type} type {processor.processor_id} core \n{[processor.power_on for processor in self.processors]}\n\n')
