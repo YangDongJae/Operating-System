@@ -65,16 +65,16 @@ class Processor:
         """
         프로세서의 전력 사용량을 계산합니다.
         """
-        if not self.power_on:
-            # 코어 유형에 따른 전력 사용량 초기화
-            if self.core_type == "P":
-                self.total_power_usage += 0.5
-            elif self.core_type == "E":
-                self.total_power_usage += 0.1
-            else:
-                raise ValueError("Invalid core type")
-
         if self.current_process is not None:
+            # 코어 유형에 따른 전력 사용량 초기화 (시동 전력)
+            if not self.power_on:
+                if self.core_type == "P":
+                    self.total_power_usage += 0.5
+                elif self.core_type == "E":
+                    self.total_power_usage += 0.1
+                else:
+                    raise ValueError("Invalid core type")
+            
             # 코어 유형에 따른 전력 사용량 계산
             if self.core_type == "P":
                 self.total_power_usage += 3
@@ -82,7 +82,7 @@ class Processor:
                 self.total_power_usage += 1
             else:
                 raise ValueError("Invalid core type")
-
+            
         return self.total_power_usage
     
     def is_busy(self) -> bool:
@@ -143,56 +143,72 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
             return True
         else:
             return False
+        
+    def execute_processor(self, processor,current_time):
+        for i in range(self.quantum):
+            print(f'{processor.current_process.process_id} is executed on {processor.processor_id} ... {i + 1} iterations')
+            processor.execute()  # 프로세서 실행
+            processor.calculate_power_usage()  # 프로세서 동작 전력 계산
+            print(f'remain BT : {processor.current_process.burst_time} \n')
 
-    def schedule(self, waiting_queue: List[Process]):  # 대기열을 인자로 받음
+        if processor.current_process.burst_time > 0:
+            self.processes.append(processor.current_process)
+            processor.current_process = None
+            print("----------------------")
+            print(f'{[process.burst_time for process in self.processes]}')
+            print("----------------------")
+
+
+    def schedule(self):  # 대기열을 인자로 받지 않음
         current_time = 0  # 현재 시간 초기화
         self.completed_processes = []  # 완료된 프로세스 목록 초기화
 
         # 프로세스 정렬: arrival_time이 작은 순서대로 정렬
         self.processes.sort(key=lambda x: x.arrival_time)
         # 프로세스들이 남아있거나 프로세서들 중 실행 중인 프로세스가 있는 경우 계속 실행
-        while self.processes or any(processor.current_process for processor in self.processors):
+        while self.processes or any(processor.current_process for processor in self.processors):            
             # 프로세서별로 작업 수행
-            for processor in self.processors:
+            for idx, processor in enumerate(self.processors):
                 if processor.current_process is None and self.processes:
                     # 현재 시간이 프로세스의 arrival_time보다 크거나 같은 경우에만 프로세스 할당
-                    if self.processes[0].arrival_time <= current_time:  # 프로세스 할당 조건 변경
+                    if self.processes[0].arrival_time <= current_time: 
                         process = self.processes.pop(0)
                         print(f'PID : {process.process_id} turn')
 
                         # P코어 할당
-                        if self.allocation_P_Core(process):
+                        if self.allocation_P_Core(process) == True:
                             assigned = False
                             for p in self.processors:
-                                if not p.is_busy and p.core_type == "P":
+                                if not p.is_busy() and p.core_type == "P":
+                                    #추가사항 
+                                    self.update_quantum(process.burst_time)
                                     p.assign_process(process)
                                     print(f"{process.process_id} is allocated {p.core_type} : {p.processor_id}")
                                     assigned = True
                                     break
                             if not assigned:
-                                waiting_queue.append(process)
-                                print(f"{process.process_id} is placed in waiting_queue")
+                                self.processes.append(process)
+                                print(f"{process.process_id} is placed back in processes")
                                 
 
                         # E코어 할당
                         elif self.allocation_E_Core(process):
                             assigned = False
                             for p in self.processors:
-                                if not p.is_busy and p.core_type == "E":
+                                if not p.is_busy() and p.core_type == "E":
+                                    self.update_quantum(process.burst_time)                                    
                                     p.assign_process(process)
                                     print(f"{process.process_id} is allocated {p.core_type} : {p.processor_id}")
                                     assigned = True
                                     break
                             if not assigned:
-                                waiting_queue.append(process)
-                                print(f"{process.process_id} is placed in waiting_queue")
-                        
-                        #확인요청 : 아래의 구문 로직상 필요 없어보임. P코어 E코어 할당에서 이미 waiting Queue로 보내버려서 따라서 Else의 코드가 수행되면 에러임
+                                self.processes.append(process)
+                                print(f"{process.process_id} is placed back in processes")
                         else:
                             print("error")
-
+                    
                 # 프로세서에 프로세스가 할당된 경우 실행
-                if processor.current_process is not None:
+                elif processor.current_process is not None:
                     # print(f"----PID : {processor.current_process.process_id} , AT : {processor.current_process.arrival_time}----")
                     # print(f"processor ID : {self.processors[0].processor_id}\nprocessor type : {self.processors[0].core_type}\nprocessor State : {self.processors[0].power_on}\n Processor total usage : {self.processors[0].total_power_usage}\n")
                     # print(f"processor ID : {self.processors[1].processor_id}\nprocessor type : {self.processors[1].core_type}\nprocessor State : {self.processors[1].power_on}\n Processor total usage : {self.processors[1].total_power_usage}\n")
@@ -200,56 +216,39 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     # print(f"processor ID : {self.processors[3].processor_id}\nprocessor type : {self.processors[3].core_type}\nprocessor State : {self.processors[3].power_on}\n Processor total usage : {self.processors[3].total_power_usage}")
                     # print("------------------------")
                     
-                    #참고사항
-                    #
-                    
-                    #추가사항 : 프로세서 전력시 시동전력 계산
-                    if processor.power_on == False:
-                        processor.power_on = True
-                        processor.calculate_power_usage()
-                        
-                    for _ in range(self.quantum):
+                    for i in range(self.quantum):
+                        print(f'{processor.current_process.process_id} is executed on {processor.processor_id} ... {i + 1} iterations')
                         processor.execute()  # 프로세서 실행
-                        processor.calculate_power_usage() #추가사항 : 프로세서 동작 전력 계산
-                        current_time += 1  # 시간 증가
-                        if processor.current_process is None:
-                            break
+                        processor.calculate_power_usage()  # 프로세서 동작 전력 계산
+                        print(f'remain BT : {processor.current_process.burst_time} \n')
                     
-                    # 프로세서의 현재 프로세스의 BT가 남아있는 경우 readyQueue에 대기
-                    if processor.current_process is not None:
-                        processor.current_process.last_active_time = current_time
+                    if processor.current_process.burst_time > 0:
+                        self.processes.append(processor.current_process)
+                        processor.current_process = None
+                        print("----------------------")
+                        print(f'{[process.burst_time for process in self.processes]}')
+                        print("----------------------")
+                        
 
-                        # readyQueue에 프로세스가 없을 경우, TimeQuantum과 상관없이 계속 실행
-                        if not waiting_queue:
-                            for _ in range(self.quantum):
-                                processor.execute()  # 프로세서 실행
-                                processor.calculate_power_usage()  # 프로세서 동작 전력 계산
-                                current_time += 1  # 시간 증가
-                                if processor.current_process is None:
-                                    processor.power_on = False
-                                    break
+                    if processor.current_process is not None and processor.current_process.burst_time <= 0:
+                        completed_process = processor.current_process
+                        processor.current_process = None
+                                            
+                        # 프로세스가 최초로 작업이 시작되는 시점을 저장
+                        if not hasattr(completed_process, 'first_execution_start_time'):
+                            completed_process.first_execution_start_time = current_time - self.quantum
+                        completion_time = current_time
+                        # TT 공식 변경 TT  = completion time - arrived time
+                        completed_process.turnaround_time = completion_time - completed_process.arrival_time
+                        # WT 계산 타이밍 및 계산 공식 변경 WT = TT - BT 
+                        completed_process.waiting_time = completed_process.turnaround_time - completed_process.initial_burst_time
+                        if completed_process.initial_burst_time != 0:
+                            completed_process.normalized_turnaround_time = completed_process.turnaround_time / completed_process.initial_burst_time
                         else:
-                            waiting_queue.append(processor.current_process)
-                            processor.current_process = None
+                            completed_process.normalized_turnaround_time = completed_process.turnaround_time
+                        self.completed_processes.append(completed_process)
 
-                        # 프로세서의 현재 프로세스가 완료된 경우 completed_processes에 추가
-                        if processor.current_process is not None and processor.current_process.burst_time <= 0:
-                            completed_process = processor.current_process
-                            processor.current_process = None
-                                                
-                            # 프로세스가 최초로 작업이 시작되는 시점을 저장
-                            if not hasattr(completed_process, 'first_execution_start_time'):
-                                completed_process.first_execution_start_time = current_time - self.quantum
-                            completion_time = current_time
-                            # TT 공식 변경 TT  = completion time - arrived time
-                            completed_process.turnaround_time = completion_time - completed_process.arrival_time
-                            # WT 계산 타이밍 및 계산 공식 변경 WT = TT - BT 
-                            completed_process.waiting_time = completed_process.turnaround_time - completed_process.initial_burst_time
-                            if completed_process.initial_burst_time != 0:
-                                completed_process.normalized_turnaround_time = completed_process.turnaround_time / completed_process.initial_burst_time
-                            else:
-                                completed_process.normalized_turnaround_time = completed_process.turnaround_time
-                            self.completed_processes.append(completed_process)
+            current_time += max(1, sum(execution_done))  # 수정사항2 : 모든 프로세서가 실행되었으면 시간을 증가시킴
 
     def update_quantum(self, remaining_bt: int):
         for bt_range, quantum in self.time_quantum_table.items():
@@ -311,9 +310,9 @@ class MainProgram:
             else:
                 gpt_multiplier = 1
 
-            burst_time = int(complexity * gpt_multiplier)
-            burst_time = max(1, min(burst_time, 45))
-            # burst_time = BT_ITEMS.pop(0)
+            # burst_time = int(complexity * gpt_multiplier)
+            # burst_time = max(1, min(burst_time, 45))
+            burst_time = BT_ITEMS.pop(0)
 
             process = Process(process_id, arrival_time, burst_time, complexity, gpt_model)
             self.processes.append(process)
@@ -322,8 +321,7 @@ class MainProgram:
         # 각 프로세스를 스케줄러에 추가하고 스케줄링 실행
         for process in self.processes:
             self.scheduler.add_process(process)
-
-        self.scheduler.schedule(self.waiting_queue)  # 대기열을 인자로 전달
+        self.scheduler.schedule()  # 대기열을 인자로 전달
 
     def print_final_results(self):
         # 스케줄러를 통해 최종 결과 출력
