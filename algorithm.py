@@ -22,6 +22,7 @@ class Process:
         self.normalized_turnaround_time = 0
         self.initial_burst_time = burst_time
         self.last_active_time = 0
+        self.start_time = None
     
     def get_process_info(self):
         print("◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆")
@@ -259,12 +260,19 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                                                     
                                 # 프로세스가 최초로 작업이 시작되는 시점을 저장
                                 if not hasattr(completed_process, 'first_execution_start_time'):
-                                    completed_process.first_execution_start_time = current_time - self.quantum
-                                completion_time = processor.current_time
-                                # TT 공식 변경 TT  = completion time - arrived time
-                                completed_process.turnaround_time = completion_time - completed_process.arrival_time
-                                # WT 계산 타이밍 및 계산 공식 변경 WT = TT - BT 
-                                completed_process.waiting_time = completed_process.waiting_time
+                                    if processor.core_type == "P":
+                                        completed_process.first_execution_start_time = processor.current_time - self.quantum + 1
+                                    elif processor.core_type == "E":
+                                        completed_process.first_execution_start_time = processor.current_time - self.quantum + 2
+                                
+                                # TT 계산
+                                if processor.core_type == "P":
+                                    completed_process.turnaround_time = processor.current_time - completed_process.arrival_time + 1
+                                elif processor.core_type == "E":
+                                    completed_process.turnaround_time = processor.current_time - completed_process.arrival_time + 2
+                                    
+                                # WT 계산
+                                completed_process.waiting_time = completed_process.turnaround_time - completed_process.initial_burst_time
                                 if completed_process.initial_burst_time != 0:
                                     completed_process.normalized_turnaround_time = completed_process.turnaround_time / completed_process.initial_burst_time
                                 else:
