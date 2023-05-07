@@ -213,6 +213,9 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     while remaining_quantum > 0:  # Time Quantum이 남아있는 동안 실행합니다.
                         processor.calculate_power_usage()  # 프로세서 동작 전력 계산
                         processor.execute()  # 프로세서 실행
+                        #강제종료 조치 
+                        if processor.current_process is None:
+                            break
                         processor.current_time += 1
                         remaining_quantum -= 1  # Time Quantum을 감소시킵니다.
                         print("======================")
@@ -223,8 +226,11 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                         print(f'Initial BT : {processor.current_process.initial_burst_time}')
                         print(f'REMAIN BT : {processor.current_process.burst_time}')
                         print(f'Processing TIME : {processor.current_time}')
-                        
+
                         if remaining_quantum == 0 or processor.current_process.burst_time <= 0:
+                            if processor.current_process.burst_time <= 0:
+                                remaining_quantum = 0
+                                                            
                             if processor.current_process is not None and processor.current_process.burst_time > 0:
                                 if processor.current_process not in self.processes:
                                     self.processes.append(processor.current_process)
@@ -233,19 +239,15 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                                 print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬")
                                 print(f'{[process.burst_time for process in self.processes]}')
                                 print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬")
-                            
+
                             elif processor.current_process is not None and processor.current_process.burst_time <= 0:
-                                
-                                'processor.current_process 초기화 위치 선정 해야함'
-                                
-                                #'processor.current_process 초기화 위치 선정 해야함' 여기로
                                 completed_process = processor.current_process
                                 processor.current_process = None
                                                     
                                 # 프로세스가 최초로 작업이 시작되는 시점을 저장
                                 if not hasattr(completed_process, 'first_execution_start_time'):
                                     completed_process.first_execution_start_time = current_time - self.quantum
-                                completion_time = current_time
+                                completion_time = processor.current_time
                                 # TT 공식 변경 TT  = completion time - arrived time
                                 completed_process.turnaround_time = completion_time - completed_process.arrival_time
                                 # WT 계산 타이밍 및 계산 공식 변경 WT = TT - BT 
@@ -255,8 +257,10 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                                 else:
                                     completed_process.normalized_turnaround_time = completed_process.turnaround_time
                                 self.completed_processes.append(completed_process)
-                                
-                                #'processor.current_process 초기화 위치 선정 해야함' 아님 여기로
+
+                                print("▬▬▬▬▬COMPLETE▬▬▬▬▬")
+                                print(f'{[process.process_id for process in self.completed_processes]}')
+                                print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬")                                
                     
                     processor.power_on = False
                     print(f'\n\n Turn off {processor.core_type} type {processor.processor_id} core \n{[processor.power_on for processor in self.processors]}\n\n')
@@ -285,7 +289,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         # 각 완료된 프로세스에 대한 정보 출력
         for process in self.completed_processes:
             completion_time = process.arrival_time + process.turnaround_time
-            print(f"{process.process_id} | {process.arrival_time} | {process.initial_burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.normalized_turnaround_time} | {completion_time}")
+            print(f"    {process.process_id}      |      {process.arrival_time}       |     {process.initial_burst_time}     |      {process.waiting_time}     |        {process.turnaround_time}        |            {round(process.normalized_turnaround_time,2)}             | {completion_time}")
 
         #AVG NTT 출력
         avg_ntt = self.calculate_avg_ntt()
