@@ -63,7 +63,6 @@ class Processor:
             if self.current_process.initial_burst_time - self.current_process.burst_time >= 30:
                 print(f"Process {self.current_process.process_id} has been forcibly terminated.")
                 self.current_process = None
-
     def calculate_initial_power_usage(self):
         if not self.power_on:
             if self.core_type == "P":
@@ -101,6 +100,14 @@ class Processor:
 
 
 class SchedulingAlgorithm:
+    def __init__(self, no_of_processors: int):
+        self.no_of_processors = no_of_processors
+        self.processors = [Processor(i, "P") if i < no_of_processors - 1 else Processor(i, "E") for i in range(no_of_processors)]
+        self.processes = []
+
+    def add_process(self, process: Process):
+        self.processes.append(process)
+
     def schedule(self):
         raise NotImplementedError("schedule method must be implemented by a subclass")
 
@@ -117,6 +124,7 @@ class SchedulingAlgorithm:
 
 class RoundRobinAlgorithm(SchedulingAlgorithm):
     def __init__(self, no_of_processors: int):
+        super().__init__(no_of_processors)
         self.time_quantum_table = {
             (1, 10): 2,
             (11, 20): 4,
@@ -124,20 +132,14 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
             (31, 45): 8,
         }
         self.quantum = 0
-        self.processors = [Processor(i, "P") if i < no_of_processors - 1 else Processor(i, "E") for i in range(no_of_processors)]
-        self.processes = []
-        self.ready_queue = []
         self.completed_processes = []  # 안료된 프로세스 목록 초기화
-
-    def add_process(self, process):
-        self.processes.append(process)
-
+    
     #정책 추가 가능성에 의한 allocation Policy 분할 개발 하지만 overhead
     def allocation_E_Core(self, process):
         # E 코어 할당 정책
         E_condition1 = process.burst_time == 1
         E_condition2 = process.complexity <= 4
-        E_condition3 = all(proc.is_busy() for proc in self.processors if proc.core_type == "P") and not any(p.burst_time == 1 or p.complexity <= 4 for p in self.ready_queue)
+        E_condition3 = all(proc.is_busy() for proc in self.processors if proc.core_type == "P") and not any(p.burst_time == 1 or p.complexity <= 4 for p in self.processes)
         E_condition4 = any(p for p in self.processors if not p.is_busy() and p.core_type == "E")  # 추가한 조건
 
         if (E_condition1 or E_condition2 or E_condition3) and E_condition4:
@@ -158,20 +160,16 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
 
     def schedule(self):  # 대기열을 인자로 받지 않음
         current_time = 0  # 현재 시간 초기화
+        self.completed_processes = []  # 완료된 프로세스 목록 초기화          
 
         # 프로세스 정렬: arrival_time이 작은 순서대로 정렬
         self.processes.sort(key=lambda x: x.arrival_time)
         # 프로세스들이 남아있거나 프로세서들 중 실행 중인 프로세스가 있는 경우 계속 실행
-        while self.processes or self.ready_queue or any(processor.current_process for processor in self.processors):
-            incoming_processes = [proc for proc in self.processes if proc.arrival_time == current_time]
-            for process in incoming_processes:
-                self.processes.remove(process)
-                self.ready_queue.append(process)
-                
+        while self.processes or any(processor.current_process for processor in self.processors):            
             # 프로세서별로 작업 수행
             for idx, processor in enumerate(self.processors):
-                if processor.current_process is None and self.ready_queue:
-                    process = self.ready_queue.pop(0)
+                if processor.current_process is None and self.processes:
+                    process = self.processes.pop(0)
                     process.get_process_info()
                     
                     # P코어 할당
@@ -186,8 +184,8 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                                 p.calculate_initial_power_usage()  # 프로세서 시동 전력 계산                                
                                 break
                         if not assigned:
-                            self.ready_queue.append(process)
-                            print(f"{process.process_id} is placed back in readyqueue")
+                            self.processes.insert(0,process)
+                            print(f"{process.process_id} is placed back in processes")
                             
 
                     # E코어 할당
@@ -201,8 +199,8 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                                 p.calculate_initial_power_usage()  # 프로세서 시동 전력 계산
                                 break
                         if not assigned:
-                            self.ready_queue.append(process)
-                            print(f"{process.process_id} is placed back in ready queue")
+                            self.processes.insert(0,process)
+                            print(f"{process.process_id} is placed back in processes")
                     else:
                         print("error")
                         
@@ -233,8 +231,8 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                                 remaining_quantum = 0
                                                             
                             if processor.current_process is not None and processor.current_process.burst_time > 0:
-                                if processor.current_process not in self.ready_queue:
-                                    self.ready_queue.append(processor.current_process)
+                                if processor.current_process not in self.processes:
+                                    self.processes.append(processor.current_process)
                                 processor.current_process = None
                                     
                                 print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬")
