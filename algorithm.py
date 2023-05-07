@@ -26,6 +26,7 @@ class Process:
     def get_process_info(self):
         print("◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆")
         print(f'PID : {self.process_id}')
+        print(f'AT : {self.arrival_time}')
         print(f'BT : {self.burst_time}')
         print(f'Complexity : {self.complexity}')
         print("◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆")
@@ -139,7 +140,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         # E 코어 할당 정책
         E_condition1 = process.burst_time == 1
         E_condition2 = process.complexity <= 4
-        E_condition3 = all(proc.is_busy() for proc in self.processors if proc.core_type == "P") and not any(p.burst_time == 1 or p.complexity <= 4 for p in self.processes)
+        E_condition3 = all(proc.is_busy() for proc in self.processors if proc.core_type == "P") 
         E_condition4 = any(p for p in self.processors if not p.is_busy() and p.core_type == "E")  # 추가한 조건
 
         if (E_condition1 or E_condition2 or E_condition3) and E_condition4:
@@ -151,9 +152,11 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         # P 코어 할당 정책
         P_condition1 = process.burst_time >= 2
         P_condition2 = process.complexity > 4
-        P_condition3 = any(p for p in self.processors if not p.is_busy() and p.core_type == "P")  # 추가한 조건
+        P_condition3 = all(proc.is_busy() for proc in self.processors if proc.core_type == "E")
+        P_condition4 = any(p for p in self.processors if not p.is_busy() and p.core_type == "P")  # 추가한 조건
+        
 
-        if (P_condition1 or P_condition2) and P_condition3:
+        if (P_condition1 or P_condition2 or P_condition3) and P_condition4:
             return True
         else:
             return False
@@ -203,7 +206,11 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                             self.processes.insert(0,process)
                             print(f"{process.process_id} is placed back in processes")
                     else:
-                        print("error")
+                        print("------------ERROR------------")
+                        print(process.get_process_info())
+                        print(f'{[p.current_process for p in self.processors]}')
+                        print("------------ERROR------------")
+                        raise Exception("프로세서에 할당되지 않음")
                         
                 # 프로세서에 프로세스가 할당된 경우 실행
                 elif processor.current_process is not None:
@@ -314,11 +321,11 @@ class MainProgram:
     def create_processes(self):
         # 각 프로세스를 생성하고 프로세스 목록에 추가
         AT_TIMES = list(range(0,100))
-        BT_ITEMS = [14,18,30]
+        # BT_ITEMS = [3,1,9]
         for i in range(self.N):
             process_id = i + 1
             arrival_time = AT_TIMES.pop(0)
-            complexity = random.randint(5, 30)
+            complexity = random.randint(1, 4)
             gpt_model = random.choice(["GPT4", "Default GPT 3.5", "Legacy GPT 3.5"])
 
             if gpt_model == "GPT4":
@@ -326,9 +333,9 @@ class MainProgram:
             else:
                 gpt_multiplier = 1
 
-            # burst_time = int(complexity * gpt_multiplier)
-            # burst_time = max(1, min(burst_time, 45))
-            burst_time = BT_ITEMS.pop(0)
+            burst_time = int(complexity * gpt_multiplier)
+            burst_time = max(1, min(burst_time, 45))
+            # burst_time = BT_ITEMS.pop(0)
 
             process = Process(process_id, arrival_time, burst_time, complexity, gpt_model)
             self.processes.append(process)
@@ -344,7 +351,7 @@ class MainProgram:
         self.scheduler.print_results()
 
 def main():
-    N = 3  # 프로세스 개수
+    N = 15  # 프로세스 개수
     P = 4  # 프로세서 개수
 
     main_program = MainProgram(N, P)
