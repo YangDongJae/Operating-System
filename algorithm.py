@@ -54,12 +54,11 @@ class Processor:
         if self.current_process.burst_time is not None:
             # 코어 유형에 따른 버스트 시간 감소
             if self.core_type == "P":
-                self.current_process.burst_time -= 2
+                self.current_process.burst_time = max(0, self.current_process.burst_time - 2)
             elif self.core_type == "E":
-                self.current_process.burst_time -= 1
+                self.current_process.burst_time = max(0, self.current_process.burst_time - 1)
             else:
                 raise ValueError("Invalid core type")
-
             # BT시간이 30초 이상이면서, 프로세서에서 30초이상 작업된 프로세스 강제종료
             if self.current_process.initial_burst_time - self.current_process.burst_time >= 30:
                 print(f"Process {self.current_process.process_id} has been forcibly terminated.")
@@ -160,12 +159,16 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
             return True
         else:
             return False
+        
+    def update_waiting_time(self, current_time):
+        for process in self.processes:
+            if process.arrival_time <= current_time:
+                process.waiting_time += 1        
 
     def schedule(self):  # 대기열을 인자로 받지 않음
         current_time = 0  # 현재 시간 초기화
         self.completed_processes = []  # 완료된 프로세스 목록 초기화
-                
-
+        
         # 프로세스 정렬: arrival_time이 작은 순서대로 정렬
         self.processes.sort(key=lambda x: x.arrival_time)
         # 프로세스들이 남아있거나 프로세서들 중 실행 중인 프로세스가 있는 경우 계속 실행
@@ -220,12 +223,13 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     while remaining_quantum > 0:  # Time Quantum이 남아있는 동안 실행합니다.
                         processor.calculate_power_usage()  # 프로세서 동작 전력 계산
                         processor.execute()  # 프로세서 실행
+                        self.update_waiting_time(processor.current_time)                        
                         #강제종료 조치 
                         if processor.current_process is None:
                             break
                         processor.current_time += 1
                         remaining_quantum -= 1  # Time Quantum을 감소시킵니다.
-                        print("======================")
+                        print("\n======================")
                         print(f'PID : {processor.current_process.process_id}')
                         print(f'PROCESSOR Type : {processor.core_type}')
                         print(f'PROCESSOR ID : {processor.processor_id}')                        
@@ -241,11 +245,13 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                             if processor.current_process is not None and processor.current_process.burst_time > 0:
                                 if processor.current_process not in self.processes:
                                     self.processes.append(processor.current_process)
-                                processor.current_process = None
-                                    
+                                else:
+                                    processor.current_process.burst_time = 0
+
                                 print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬")
                                 print(f'{[process.burst_time for process in self.processes]}')
-                                print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬")
+                                print("▬▬▬▬▬▬▬▬▬▬▬▬▬▬")                                    
+                                processor.current_process = None                                
 
                             elif processor.current_process is not None and processor.current_process.burst_time <= 0:
                                 completed_process = processor.current_process
@@ -258,7 +264,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                                 # TT 공식 변경 TT  = completion time - arrived time
                                 completed_process.turnaround_time = completion_time - completed_process.arrival_time
                                 # WT 계산 타이밍 및 계산 공식 변경 WT = TT - BT 
-                                completed_process.waiting_time = completed_process.turnaround_time - completed_process.initial_burst_time
+                                completed_process.waiting_time = completed_process.waiting_time
                                 if completed_process.initial_burst_time != 0:
                                     completed_process.normalized_turnaround_time = completed_process.turnaround_time / completed_process.initial_burst_time
                                 else:
@@ -272,8 +278,9 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     processor.power_on = False
                     print(f'\n\n Turn off {processor.core_type} type {processor.processor_id} core \n{[processor.power_on for processor in self.processors]}\n\n')
                     
-
-
+##
+##burst time 계산용 TT는 따로 추가해야함
+##
     def update_quantum(self, remaining_bt: int):
         for bt_range, quantum in self.time_quantum_table.items():
             lower, upper = bt_range
@@ -285,7 +292,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         total_ntt = sum(process.normalized_turnaround_time for process in self.completed_processes)
         completed_processes_count = len(self.completed_processes)
         if completed_processes_count == 0:
-            print("에러에러!!!!!!!!!! 프로세스가 종료된게 아무것도 없음")
+            raise Exception("모든 프로세스가 강제종료 됨")
         return total_ntt / completed_processes_count
 
 
@@ -293,8 +300,11 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
     def print_results(self):
         # 결과 헤더 출력
         print("Process ID | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Normalized Turnaround Time | Completion Time ")
+        
+        sorted_completed_processes = sorted(self.completed_processes, key=lambda process: process.arrival_time)
+        
         # 각 완료된 프로세스에 대한 정보 출력
-        for process in self.completed_processes:
+        for process in sorted_completed_processes:
             completion_time = process.arrival_time + process.turnaround_time
             print(f"    {process.process_id}      |      {process.arrival_time}       |     {process.initial_burst_time}     |      {process.waiting_time}     |        {process.turnaround_time}        |            {round(process.normalized_turnaround_time,2)}             | {completion_time}")
 
@@ -320,12 +330,13 @@ class MainProgram:
 
     def create_processes(self):
         # 각 프로세스를 생성하고 프로세스 목록에 추가
-        AT_TIMES = list(range(0,100))
+        AT_TIMES = [1,2,3,4,100]
+        # AT_TIMES = list(range(0,100))
         # BT_ITEMS = [3,1,9]
         for i in range(self.N):
             process_id = i + 1
             arrival_time = AT_TIMES.pop(0)
-            complexity = random.randint(1, 4)
+            complexity = random.randint(1, 40)
             gpt_model = random.choice(["GPT4", "Default GPT 3.5", "Legacy GPT 3.5"])
 
             if gpt_model == "GPT4":
@@ -351,7 +362,7 @@ class MainProgram:
         self.scheduler.print_results()
 
 def main():
-    N = 15  # 프로세스 개수
+    N = 5  # 프로세스 개수
     P = 4  # 프로세서 개수
 
     main_program = MainProgram(N, P)
