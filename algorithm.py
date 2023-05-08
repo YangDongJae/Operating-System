@@ -380,7 +380,7 @@ class MainProgram:
         self.scheduler.print_results()
 
 def main():
-    N = 50  # 프로세스 개수
+    N = 100  # 프로세스 개수
     P = 4  # 프로세서 개수
 
     main_program = MainProgram(N, P)
