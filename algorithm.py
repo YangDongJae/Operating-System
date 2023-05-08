@@ -161,10 +161,11 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         else:
             return False
         
-    def update_waiting_time(self, current_time):
+    def update_waiting_time(self, current_time: int):
         for process in self.processes:
-            if process.arrival_time <= current_time:
-                process.waiting_time += 1        
+            if process.arrival_time <= current_time and process.process_id not in [completed_process.process_id for completed_process in self.completed_processes]:
+                process.waiting_time += 1
+
 
     def schedule(self):  # 대기열을 인자로 받지 않음
         current_time = 0  # 현재 시간 초기화
@@ -224,7 +225,11 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     while remaining_quantum > 0:  # Time Quantum이 남아있는 동안 실행합니다.
                         processor.calculate_power_usage()  # 프로세서 동작 전력 계산
                         processor.execute()  # 프로세서 실행
-                        self.update_waiting_time(processor.current_time)                        
+                        self.update_waiting_time(processor.current_time)
+                        print("!!!!!!!!!!!!!")                        
+                        if processor.current_process is not None:
+                            print(processor.current_process.waiting_time)                            
+                        print("!!!!!!!!!!!!!")                     
                         #강제종료 조치 
                         if processor.current_process is None:
                             break
@@ -267,7 +272,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                                 
 
                                 # WT 계산
-                                completed_process.waiting_time = completed_process.initial_burst_time - completed_process.turnaround_time
+                                completed_process.waiting_time = completed_process.waiting_time
                                 
                                 
                                 if completed_process.initial_burst_time != 0:
@@ -317,7 +322,8 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         print(f"Average NTT : {avg_ntt} time")
         # P 코어와 E 코어의 전력 사용량을 계산하여 출력
         p_cores_power_usage = sum([processor.total_power_usage for processor in self.processors if processor.core_type == "P"])
-        e_cores_power_usage = sum([processor.total_power_usage for processor in self.processors if processor.core_type == "E"])
+        e_cores_power_usage = round(sum([processor.total_power_usage for processor in self.processors if processor.core_type == "E"]),2)
+        #roud function은 파이썬 부동소수점 연산 결과에서 발생한 파이썬 프로그래밍 언어 자체적 문제
         print(f"P cores total power usage: {p_cores_power_usage} W")
         print(f"E cores total power usage: {e_cores_power_usage} W")
         
