@@ -13,6 +13,7 @@ class Processor:
         self.processor_id = processor_id
         self.core_type = core_type
         self.current_process = None
+        self.power_on = False
         self.power_usage = 0
 
 class SchedulingAlgorithm:
@@ -57,6 +58,49 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
             if not processor3.current_process and self.ready_queue:
                 processor3.current_process = self.ready_queue.pop(0)
 
+            if processor0.current_process:
+                if processor0.power_on == False:
+                    processor0.power_on = True
+                    if processor0.core_type == "P":
+                        processor0.power_usage += 0.5
+                    elif processor0.core_type == "E":
+                        processor0.power_usage += 0.1
+            elif not processor0.current_process:
+                if processor0.power_on == True:
+                    processor0.power_on = False
+
+            if processor1.current_process:
+                if processor1.power_on == False:
+                    processor1.power_on = True
+                    if processor1.core_type == "P":
+                        processor1.power_usage += 0.5
+                    elif processor1.core_type == "E":
+                        processor1.power_usage += 0.1
+            elif not processor1.current_process:
+                if processor1.power_on == True:
+                    processor1.power_on = False
+
+            if processor2.current_process:
+                if processor2.power_on == False:
+                    processor2.power_on = True
+                    if processor2.core_type == "P":
+                        processor2.power_usage += 0.5
+                    elif processor2.core_type == "E":
+                        processor2.power_usage += 0.1
+            elif not processor2.current_process:
+                if processor2.power_on == True:
+                    processor2.power_on = False
+
+            if processor3.current_process:
+                if processor3.power_on == False:
+                    processor3.power_on = True
+                    if processor3.core_type == "P":
+                        processor3.power_usage += 0.5
+                    elif processor3.core_type == "E":
+                        processor3.power_usage += 0.1
+            elif not processor3.current_process:
+                if processor3.power_on == True:
+                    processor3.power_on = False
 
             if processor0.current_process:
                 processor0.current_process.count += 1
@@ -155,11 +199,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
 
 
 def main():
-    processes = [Process(1, 0, 10),
-                 Process(2, 0, 10),
-                 Process(3, 0, 10),
-                 Process(4, 0, 10),
-                 Process(5, 0, 10)]
+    processes = [Process(1, 0, 6)]
 
     rr_algorithm = RoundRobinAlgorithm()
     for process in processes:
