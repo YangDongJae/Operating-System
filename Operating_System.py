@@ -23,26 +23,33 @@ class Processor:
         self.power_usage = 0.0
 
 class SchedulingAlgorithm:
-    def __init__(self, p_core, e_core):
-        self.p_core = p_core
-        self.e_core = e_core
-        self.processors = [Processor(i,"P") for i in range(p_core)] + [Processor(i,"E") for i in range(p_core,p_core+e_core)]
+    def __init__(self, processor_select_signal):
+        self.processors = []
+
+        for signal in processor_select_signal:
+            if signal == 0:
+                self.processors.append(Processor(signal, None))
+            elif signal == 1:
+                self.processors.append(Processor(signal, "P"))
+            elif signal == 2:
+                self.processors.append(Processor(signal, "E"))
+
 
     def schedule(self):
         raise NotImplementedError("schedule method must be implemented by a subclass")
 
 class RoundRobinAlgorithm(SchedulingAlgorithm):
-    def __init__(self,P, E):
-        super().__init__(P, E)
+    def __init__(self, processor_select_signal):
+        super().__init__(processor_select_signal)
         self.process_queue = []
         self.ready_queue = []
         self.completed_processes = []
-        self.outed_process=[]
+        self.outed_processes = []
         self.time_quantum_table = {
             (1, 10):  2,
             (11, 20): 4,
             (21, 30): 6,
-            (31, 40): 8,
+            (31, float('inf')): 8
         }
 
     def add_process(self, process):
@@ -169,10 +176,15 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     self.completed_processes.append(processor0.current_process)
                     processor0.current_process = None
                 elif processor0.current_process.remaining_time > 0:
-                    if (processor0.current_process.burst_time - processor0.current_process.remaining_time) % processor0.current_process.time_quantum == 0:
+                    if processor0.current_process.count >= 10:
+                        processor0.current_process.waiting_time = (current_time - processor0.current_process.arrival_time - processor0.current_process.count + 1)
+                        processor0.current_process.turnaround_time = (processor0.current_process.waiting_time + processor0.current_process.count)
+                        processor0.current_process.completed_time = current_time + 1
+                        self.outed_processes.append(processor0.current_process)
+                        processor0.current_process = None
+                    elif (processor0.current_process.burst_time - processor0.current_process.remaining_time) % processor0.current_process.time_quantum == 0:
                         self.ready_queue.append(processor0.current_process)
                         processor0.current_process = None
-
 
             if processor1.current_process:
                 processor1.current_process.count += 1
@@ -191,7 +203,13 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     self.completed_processes.append(processor1.current_process)
                     processor1.current_process = None
                 elif processor1.current_process.remaining_time > 0:
-                    if (processor1.current_process.burst_time - processor1.current_process.remaining_time) % processor1.current_process.time_quantum == 0:
+                    if processor1.current_process.count >= 10:
+                        processor1.current_process.waiting_time = (current_time - processor1.current_process.arrival_time - processor1.current_process.count + 1)
+                        processor1.current_process.turnaround_time = (processor1.current_process.waiting_time + processor1.current_process.count)
+                        processor1.current_process.completed_time = current_time + 1
+                        self.outed_processes.append(processor1.current_process)
+                        processor1.current_process = None
+                    elif (processor1.current_process.burst_time - processor1.current_process.remaining_time) % processor1.current_process.time_quantum == 0:
                         self.ready_queue.append(processor1.current_process)
                         processor1.current_process = None
 
@@ -213,12 +231,18 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     self.completed_processes.append(processor2.current_process)
                     processor2.current_process = None
                 elif processor2.current_process.remaining_time > 0:
-                    if (processor2.current_process.burst_time - processor2.current_process.remaining_time) % processor2.current_process.time_quantum == 0:
+                    if processor2.current_process.count >= 10:
+                        processor2.current_process.waiting_time = (current_time - processor2.current_process.arrival_time - processor2.current_process.count + 1)
+                        processor2.current_process.turnaround_time = (processor2.current_process.waiting_time + processor2.current_process.count)
+                        processor2.current_process.completed_time = current_time + 1
+                        self.outed_processes.append(processor2.current_process)
+                        processor2.current_process = None
+                    elif (processor2.current_process.burst_time - processor2.current_process.remaining_time) % processor2.current_process.time_quantum == 0:
                         self.ready_queue.append(processor2.current_process)
                         processor2.current_process = None
 
-
             if processor3.current_process:
+                processor3.current_process.count += 1
                 if processor3.core_type == "P":
                     processor3.current_process.remaining_time -= 2
                 elif processor3.core_type == "E":
@@ -227,7 +251,6 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     processor3.power_usage += 3
                 elif processor3.core_type == "E":
                     processor3.power_usage += 1
-                    processor3.current_process.count += 1
                 if processor3.current_process.remaining_time <= 0:
                     processor3.current_process.waiting_time = (current_time - processor3.current_process.arrival_time - processor3.current_process.count + 1)
                     processor3.current_process.turnaround_time = (processor3.current_process.waiting_time + processor3.current_process.count)
@@ -235,36 +258,44 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     self.completed_processes.append(processor3.current_process)
                     processor3.current_process = None
                 elif processor3.current_process.remaining_time > 0:
-                    if (processor3.current_process.burst_time - processor3.current_process.remaining_time) % processor3.current_process.time_quantum == 0:
+                    if processor3.current_process.count >= 10:
+                        processor3.current_process.waiting_time = (current_time - processor3.current_process.arrival_time - processor3.current_process.count + 1)
+                        processor3.current_process.turnaround_time = (processor3.current_process.waiting_time + processor3.current_process.count)
+                        processor3.current_process.completed_time = current_time + 1
+                        self.outed_processes.append(processor3.current_process)
+                        processor3.current_process = None
+                    elif (processor3.current_process.burst_time - processor3.current_process.remaining_time) % processor3.current_process.time_quantum == 0:
                         self.ready_queue.append(processor3.current_process)
                         processor3.current_process = None
+
 
 
             current_time += 1
 
     def print_results(self):
-        print("Process ID | GPT Model | Complexity | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time")
+        print("Process ID | GPT Model | Complexity | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time | Working Time")
         for process in self.completed_processes:
-            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time}")
+            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.count}")
+        print("<아웃된 프로세스>")
+        for process in self.outed_processes:
+            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.count}")
         P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
         E_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "E"])
         print("P코어 총 전력 사용량:",P_cores_power_usage,"W")
         print("E코어 총 전력 사용량:",E_cores_power_usage,"W")
 
 class Main:
-    def __init__(self,P, E, N):
-        self.P = P
-        self.E = E
+    def __init__(self,processor_select_signal, N):
         self.N = N
         self.processes = []
-        self.rr_algorithm = RoundRobinAlgorithm(P, E)
+        self.rr_algorithm = RoundRobinAlgorithm(processor_select_signal)
 
     def create_process(self):
         for i in range(self.N):
             pid = i + 1
             arrival_time = random.randint(0,15)
             gpt_model = random.choice(["GPT 4","GPT 3.5"])
-            complexity = random.randint(1,20)
+            complexity = random.randint(1,15)
 
             if gpt_model == "GPT 4":
                 gpt_multiplier = 2
@@ -288,10 +319,9 @@ class Main:
             
 
 def main():
-    P = 3
-    E = 1
-    N = 10
-    main_program = Main(P, E, N)
+    processor_select_signal = [1, 1, 1, 2]
+    N = 20
+    main_program = Main(processor_select_signal, N)
     main_program.create_process()
     main_program.run_scheduler()
     main_program.print_result()
