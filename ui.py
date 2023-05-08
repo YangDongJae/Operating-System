@@ -206,14 +206,14 @@ class OS_Scheduler(QMainWindow, form_class):
             if self.gb_model.isEnabled():  # 처음에는 gb_model 비활성화
                 self.gb_model.setEnabled(False)
                 self.gb_model.setStyleSheet("color: lightgray")
-            self.cb_algorithm.move(55, 100)
+            self.cb_algorithm.move(100, 60)
             if index != 0:
                 text = self.cb_algorithm.currentText()
                 QMessageBox.about(
                     self, '알고리즘 선택', f'{text} 알고리즘을 선택하셨습니다.')
                 if index == 2:  # RR
                     self.gb_Timeq.setVisible(True)
-                    self.cb_algorithm.move(55, 60)
+                    self.cb_algorithm.move(10, 60)
                 if index == 6:  # TRR
                     self.gb_model.setEnabled(True)
                     self.gb_model.setStyleSheet("color: black")

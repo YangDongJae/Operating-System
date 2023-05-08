@@ -48,7 +48,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="6,7">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout" stretch="1,10,1,10">
+         <layout class="QVBoxLayout" name="verticalLayout" stretch="1,12,3,12">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,3">
             <item>
@@ -78,7 +78,7 @@
                <property name="geometry">
                 <rect>
                  <x>320</x>
-                 <y>10</y>
+                 <y>0</y>
                  <width>25</width>
                  <height>25</height>
                 </rect>
@@ -208,7 +208,7 @@
                <property name="geometry">
                 <rect>
                  <x>30</x>
-                 <y>370</y>
+                 <y>340</y>
                  <width>101</width>
                  <height>34</height>
                 </rect>
@@ -248,7 +248,7 @@
                <property name="geometry">
                 <rect>
                  <x>150</x>
-                 <y>370</y>
+                 <y>340</y>
                  <width>112</width>
                  <height>34</height>
                 </rect>
@@ -644,6 +644,830 @@
            </layout>
           </item>
           <item>
+           <widget class="QGroupBox" name="gb_readyq">
+            <property name="font">
+             <font>
+              <family>LINE Seed Sans</family>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="cursor">
+             <cursorShape>ArrowCursor</cursorShape>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;작업 대기중인 프로세스들의 Queue를 표시합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="title">
+             <string>Ready Queue</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="gb_chart">
+            <property name="font">
+             <font>
+              <family>LINE Seed Sans</family>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;스케줄링 과정을 Gantt Chart로 가시화합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="title">
+             <string>Gantt Chart</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_2" stretch="10,1,8,11,5,1,25">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0">
+            <item>
+             <widget class="QGroupBox" name="gb_algorithm">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="font">
+               <font>
+                <family>LINE Seed Sans</family>
+                <pointsize>11</pointsize>
+               </font>
+              </property>
+              <property name="title">
+               <string>Algorithm</string>
+              </property>
+              <widget class="QComboBox" name="cb_algorithm">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>100</x>
+                 <y>60</y>
+                 <width>291</width>
+                 <height>41</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans KR</family>
+                 <pointsize>9</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;프로세스 스케줄링을 위한 알고리즘을 선택합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>알고리즘을 선택하세요.</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>FCFS</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>RR</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>SPN</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>SRTN</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>HRRN</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>TRR(Transformed Round Robin)</string>
+                </property>
+               </item>
+              </widget>
+              <widget class="QGroupBox" name="gb_Timeq">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>320</x>
+                 <y>30</y>
+                 <width>171</width>
+                 <height>91</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans</family>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;RR에서 프로세스별로 얼마나 시간을 할당하는 지 선택합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="title">
+                <string>Time Quantum(δ)</string>
+               </property>
+               <widget class="QSpinBox" name="sb_Timeq">
+                <property name="geometry">
+                 <rect>
+                  <x>50</x>
+                  <y>35</y>
+                  <width>71</width>
+                  <height>31</height>
+                 </rect>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>LINE Seed Sans</family>
+                 </font>
+                </property>
+               </widget>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="gb_menu">
+              <property name="font">
+               <font>
+                <family>LINE Seed Sans</family>
+                <pointsize>11</pointsize>
+               </font>
+              </property>
+              <property name="cursor">
+               <cursorShape>ArrowCursor</cursorShape>
+              </property>
+              <property name="title">
+               <string>Menu</string>
+              </property>
+              <widget class="QPushButton" name="pb_start">
+               <property name="geometry">
+                <rect>
+                 <x>60</x>
+                 <y>32</y>
+                 <width>81</width>
+                 <height>71</height>
+                </rect>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;스케줄링을 시작합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>logo/exe.png</normaloff>logo/exe.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label">
+               <property name="geometry">
+                <rect>
+                 <x>60</x>
+                 <y>112</y>
+                 <width>77</width>
+                 <height>18</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans KR</family>
+                </font>
+               </property>
+               <property name="text">
+                <string>실행</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="lb_core">
+            <property name="font">
+             <font>
+              <family>LINE Seed Sans KR</family>
+              <pointsize>11</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>코어의 개수가 표시됩니다.</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0">
+            <item>
+             <widget class="QGroupBox" name="gb_core0">
+              <property name="font">
+               <font>
+                <family>LINE Seed Sans</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="title">
+               <string>Core 0</string>
+              </property>
+              <widget class="QComboBox" name="cb_core0">
+               <property name="geometry">
+                <rect>
+                 <x>70</x>
+                 <y>40</y>
+                 <width>101</width>
+                 <height>31</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans KR</family>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P-Core (Power Core) : 1초에 2만큼의 일을 처리하고 3W의 전력을 소비합니다.&lt;/p&gt;&lt;p&gt;E-Core (Efficiency Core) : 1초에 1만큼의 일을 처리하고 1W의 전력을 소비합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Off</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>P-Core</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>E-Core</string>
+                </property>
+               </item>
+              </widget>
+              <widget class="QLabel" name="label_2">
+               <property name="geometry">
+                <rect>
+                 <x>80</x>
+                 <y>80</y>
+                 <width>77</width>
+                 <height>18</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_3">
+               <property name="geometry">
+                <rect>
+                 <x>180</x>
+                 <y>90</y>
+                 <width>61</width>
+                 <height>18</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans</family>
+                </font>
+               </property>
+               <property name="text">
+                <string>0.0 w</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="gb_core1">
+              <property name="font">
+               <font>
+                <family>LINE Seed Sans</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="title">
+               <string>Core 1</string>
+              </property>
+              <widget class="QComboBox" name="cb_core1">
+               <property name="geometry">
+                <rect>
+                 <x>70</x>
+                 <y>40</y>
+                 <width>101</width>
+                 <height>31</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans KR</family>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P-Core (Power Core) : 1초에 2만큼의 일을 처리하고 3W의 전력을 소비합니다.&lt;/p&gt;&lt;p&gt;E-Core (Efficiency Core) : 1초에 1만큼의 일을 처리하고 1W의 전력을 소비합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Off</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>P-Core</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>E-Core</string>
+                </property>
+               </item>
+              </widget>
+              <widget class="QLabel" name="label_5">
+               <property name="geometry">
+                <rect>
+                 <x>180</x>
+                 <y>90</y>
+                 <width>61</width>
+                 <height>18</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans</family>
+                </font>
+               </property>
+               <property name="text">
+                <string>0.0 w</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="gb_core2">
+              <property name="font">
+               <font>
+                <family>LINE Seed Sans</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="title">
+               <string>Core 2</string>
+              </property>
+              <widget class="QComboBox" name="cb_core2">
+               <property name="geometry">
+                <rect>
+                 <x>70</x>
+                 <y>40</y>
+                 <width>101</width>
+                 <height>31</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans KR</family>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P-Core (Power Core) : 1초에 2만큼의 일을 처리하고 3W의 전력을 소비합니다.&lt;/p&gt;&lt;p&gt;E-Core (Efficiency Core) : 1초에 1만큼의 일을 처리하고 1W의 전력을 소비합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Off</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>P-Core</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>E-Core</string>
+                </property>
+               </item>
+              </widget>
+              <widget class="QLabel" name="label_8">
+               <property name="geometry">
+                <rect>
+                 <x>180</x>
+                 <y>90</y>
+                 <width>61</width>
+                 <height>18</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans</family>
+                </font>
+               </property>
+               <property name="text">
+                <string>0.0 w</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="gb_core3">
+              <property name="font">
+               <font>
+                <family>LINE Seed Sans</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="title">
+               <string>Core 3</string>
+              </property>
+              <widget class="QComboBox" name="cb_core3">
+               <property name="geometry">
+                <rect>
+                 <x>70</x>
+                 <y>40</y>
+                 <width>101</width>
+                 <height>31</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans KR</family>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P-Core (Power Core) : 1초에 2만큼의 일을 처리하고 3W의 전력을 소비합니다.&lt;/p&gt;&lt;p&gt;E-Core (Efficiency Core) : 1초에 1만큼의 일을 처리하고 1W의 전력을 소비합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Off</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>P-Core</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>E-Core</string>
+                </property>
+               </item>
+              </widget>
+              <widget class="QLabel" name="label_9">
+               <property name="geometry">
+                <rect>
+                 <x>180</x>
+                 <y>90</y>
+                 <width>61</width>
+                 <height>18</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans</family>
+                </font>
+               </property>
+               <property name="text">
+                <string>0.0 w</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0">
+            <item>
+             <widget class="QGroupBox" name="gb_model">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <family>LINE Seed Sans</family>
+                <pointsize>11</pointsize>
+               </font>
+              </property>
+              <property name="cursor">
+               <cursorShape>ArrowCursor</cursorShape>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: lightgray</string>
+              </property>
+              <property name="title">
+               <string>GPT Model</string>
+              </property>
+              <property name="flat">
+               <bool>false</bool>
+              </property>
+              <widget class="QGroupBox" name="groupBox">
+               <property name="geometry">
+                <rect>
+                 <x>120</x>
+                 <y>30</y>
+                 <width>101</width>
+                 <height>111</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans</family>
+                </font>
+               </property>
+               <property name="title">
+                <string>3.5</string>
+               </property>
+               <widget class="QPushButton" name="pb_model1">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>81</width>
+                  <height>81</height>
+                 </rect>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;GPT 3.5 모델을 선택합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>logo/g_gpt-icon.png</normaloff>
+                  <normalon>logo/gpt-icon.png</normalon>logo/g_gpt-icon.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>80</width>
+                  <height>80</height>
+                 </size>
+                </property>
+               </widget>
+              </widget>
+              <widget class="QGroupBox" name="groupBox_2">
+               <property name="geometry">
+                <rect>
+                 <x>290</x>
+                 <y>30</y>
+                 <width>101</width>
+                 <height>111</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <family>LINE Seed Sans</family>
+                </font>
+               </property>
+               <property name="title">
+                <string>4.0</string>
+               </property>
+               <widget class="QPushButton" name="pb_model2">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>81</width>
+                  <height>81</height>
+                 </rect>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;GPT 4.0 모델을 선택합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>logo/g_gpt-icon.png</normaloff>
+                  <normalon>logo/gpt-icon.png</normalon>logo/g_gpt-icon.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>80</width>
+                  <height>80</height>
+                 </size>
+                </property>
+               </widget>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="gb_complex">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="font">
+               <font>
+                <family>LINE Seed Sans</family>
+                <pointsize>11</pointsize>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: lightgray</string>
+              </property>
+              <property name="title">
+               <string>Complex</string>
+              </property>
+              <widget class="QGroupBox" name="gb_highc">
+               <property name="geometry">
+                <rect>
+                 <x>50</x>
+                 <y>30</y>
+                 <width>101</width>
+                 <height>111</height>
+                </rect>
+               </property>
+               <property name="title">
+                <string>High</string>
+               </property>
+               <widget class="QPushButton" name="pb_high">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>81</width>
+                  <height>81</height>
+                 </rect>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>logo/g_complex.png</normaloff>logo/g_complex.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>81</width>
+                  <height>81</height>
+                 </size>
+                </property>
+               </widget>
+              </widget>
+              <widget class="QGroupBox" name="gb_lowc">
+               <property name="geometry">
+                <rect>
+                 <x>350</x>
+                 <y>30</y>
+                 <width>101</width>
+                 <height>111</height>
+                </rect>
+               </property>
+               <property name="title">
+                <string>Low</string>
+               </property>
+               <widget class="QPushButton" name="pb_low">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>81</width>
+                  <height>81</height>
+                 </rect>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>logo/g_complex.png</normaloff>logo/g_complex.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>81</width>
+                  <height>81</height>
+                 </size>
+                </property>
+               </widget>
+              </widget>
+              <widget class="QGroupBox" name="gb_midc">
+               <property name="geometry">
+                <rect>
+                 <x>200</x>
+                 <y>30</y>
+                 <width>101</width>
+                 <height>111</height>
+                </rect>
+               </property>
+               <property name="title">
+                <string>Mid</string>
+               </property>
+               <widget class="QPushButton" name="pb_mid">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>81</width>
+                  <height>81</height>
+                 </rect>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>logo/g_complex.png</normaloff>logo/g_complex.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>81</width>
+                  <height>81</height>
+                 </size>
+                </property>
+               </widget>
+              </widget>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="gb_powerc">
+            <property name="font">
+             <font>
+              <family>LINE Seed Sans</family>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;총 소비 전력을 표시합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="title">
+             <string>Total Power Comsumption</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="lb_result">
             <property name="font">
              <font>
@@ -714,605 +1538,6 @@
           </item>
          </layout>
         </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_2" stretch="15,1,10,10,5,5,10">
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="2,3">
-            <item>
-             <widget class="QGroupBox" name="gb_algorithm">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="font">
-               <font>
-                <family>LINE Seed Sans</family>
-                <pointsize>11</pointsize>
-               </font>
-              </property>
-              <property name="title">
-               <string>Algorithm</string>
-              </property>
-              <widget class="QComboBox" name="cb_algorithm">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="geometry">
-                <rect>
-                 <x>55</x>
-                 <y>100</y>
-                 <width>291</width>
-                 <height>41</height>
-                </rect>
-               </property>
-               <property name="font">
-                <font>
-                 <family>LINE Seed Sans KR</family>
-                 <pointsize>9</pointsize>
-                </font>
-               </property>
-               <property name="cursor">
-                <cursorShape>PointingHandCursor</cursorShape>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;프로세스 스케줄링을 위한 알고리즘을 선택합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <item>
-                <property name="text">
-                 <string>알고리즘을 선택하세요.</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>FCFS</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>RR</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>SPN</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>SRTN</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>HRRN</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>TRR(Transformed Round Robin)</string>
-                </property>
-               </item>
-              </widget>
-              <widget class="QGroupBox" name="gb_Timeq">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="geometry">
-                <rect>
-                 <x>100</x>
-                 <y>120</y>
-                 <width>181</width>
-                 <height>91</height>
-                </rect>
-               </property>
-               <property name="font">
-                <font>
-                 <family>LINE Seed Sans</family>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;RR에서 프로세스별로 얼마나 시간을 할당하는 지 선택합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="title">
-                <string>Time Quantum(δ)</string>
-               </property>
-               <widget class="QSpinBox" name="sb_Timeq">
-                <property name="geometry">
-                 <rect>
-                  <x>50</x>
-                  <y>35</y>
-                  <width>71</width>
-                  <height>31</height>
-                 </rect>
-                </property>
-                <property name="font">
-                 <font>
-                  <family>LINE Seed Sans</family>
-                 </font>
-                </property>
-               </widget>
-              </widget>
-             </widget>
-            </item>
-            <item>
-             <widget class="QGroupBox" name="gb_menu">
-              <property name="font">
-               <font>
-                <family>LINE Seed Sans</family>
-                <pointsize>11</pointsize>
-               </font>
-              </property>
-              <property name="cursor">
-               <cursorShape>ArrowCursor</cursorShape>
-              </property>
-              <property name="title">
-               <string>Menu</string>
-              </property>
-              <widget class="QPushButton" name="pb_start">
-               <property name="geometry">
-                <rect>
-                 <x>240</x>
-                 <y>80</y>
-                 <width>81</width>
-                 <height>71</height>
-                </rect>
-               </property>
-               <property name="cursor">
-                <cursorShape>PointingHandCursor</cursorShape>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;스케줄링을 시작합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>logo/exe.png</normaloff>logo/exe.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>70</width>
-                 <height>70</height>
-                </size>
-               </property>
-              </widget>
-              <widget class="QLabel" name="label">
-               <property name="geometry">
-                <rect>
-                 <x>240</x>
-                 <y>160</y>
-                 <width>77</width>
-                 <height>18</height>
-                </rect>
-               </property>
-               <property name="font">
-                <font>
-                 <family>LINE Seed Sans KR</family>
-                </font>
-               </property>
-               <property name="text">
-                <string>실행</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QLabel" name="lb_core">
-            <property name="font">
-             <font>
-              <family>LINE Seed Sans KR</family>
-              <pointsize>11</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>코어의 개수가 표시됩니다.</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0">
-            <item>
-             <widget class="QGroupBox" name="gb_core0">
-              <property name="font">
-               <font>
-                <family>LINE Seed Sans</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="title">
-               <string>Core 0</string>
-              </property>
-              <widget class="QComboBox" name="cb_core0">
-               <property name="geometry">
-                <rect>
-                 <x>60</x>
-                 <y>50</y>
-                 <width>101</width>
-                 <height>31</height>
-                </rect>
-               </property>
-               <property name="font">
-                <font>
-                 <family>LINE Seed Sans KR</family>
-                </font>
-               </property>
-               <property name="cursor">
-                <cursorShape>PointingHandCursor</cursorShape>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P-Core (Power Core) : 1초에 2만큼의 일을 처리하고 3W의 전력을 소비합니다.&lt;/p&gt;&lt;p&gt;E-Core (Efficiency Core) : 1초에 1만큼의 일을 처리하고 1W의 전력을 소비합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Off</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>P-Core</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>E-Core</string>
-                </property>
-               </item>
-              </widget>
-             </widget>
-            </item>
-            <item>
-             <widget class="QGroupBox" name="gb_core1">
-              <property name="font">
-               <font>
-                <family>LINE Seed Sans</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="title">
-               <string>Core 1</string>
-              </property>
-              <widget class="QComboBox" name="cb_core1">
-               <property name="geometry">
-                <rect>
-                 <x>60</x>
-                 <y>50</y>
-                 <width>101</width>
-                 <height>31</height>
-                </rect>
-               </property>
-               <property name="font">
-                <font>
-                 <family>LINE Seed Sans KR</family>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="cursor">
-                <cursorShape>PointingHandCursor</cursorShape>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P-Core (Power Core) : 1초에 2만큼의 일을 처리하고 3W의 전력을 소비합니다.&lt;/p&gt;&lt;p&gt;E-Core (Efficiency Core) : 1초에 1만큼의 일을 처리하고 1W의 전력을 소비합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Off</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>P-Core</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>E-Core</string>
-                </property>
-               </item>
-              </widget>
-             </widget>
-            </item>
-            <item>
-             <widget class="QGroupBox" name="gb_core2">
-              <property name="font">
-               <font>
-                <family>LINE Seed Sans</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="title">
-               <string>Core 2</string>
-              </property>
-              <widget class="QComboBox" name="cb_core2">
-               <property name="geometry">
-                <rect>
-                 <x>60</x>
-                 <y>50</y>
-                 <width>101</width>
-                 <height>31</height>
-                </rect>
-               </property>
-               <property name="font">
-                <font>
-                 <family>LINE Seed Sans KR</family>
-                </font>
-               </property>
-               <property name="cursor">
-                <cursorShape>PointingHandCursor</cursorShape>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P-Core (Power Core) : 1초에 2만큼의 일을 처리하고 3W의 전력을 소비합니다.&lt;/p&gt;&lt;p&gt;E-Core (Efficiency Core) : 1초에 1만큼의 일을 처리하고 1W의 전력을 소비합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Off</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>P-Core</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>E-Core</string>
-                </property>
-               </item>
-              </widget>
-             </widget>
-            </item>
-            <item>
-             <widget class="QGroupBox" name="gb_core3">
-              <property name="font">
-               <font>
-                <family>LINE Seed Sans</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="title">
-               <string>Core 3</string>
-              </property>
-              <widget class="QComboBox" name="cb_core3">
-               <property name="geometry">
-                <rect>
-                 <x>60</x>
-                 <y>50</y>
-                 <width>101</width>
-                 <height>31</height>
-                </rect>
-               </property>
-               <property name="font">
-                <font>
-                 <family>LINE Seed Sans KR</family>
-                </font>
-               </property>
-               <property name="cursor">
-                <cursorShape>PointingHandCursor</cursorShape>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P-Core (Power Core) : 1초에 2만큼의 일을 처리하고 3W의 전력을 소비합니다.&lt;/p&gt;&lt;p&gt;E-Core (Efficiency Core) : 1초에 1만큼의 일을 처리하고 1W의 전력을 소비합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Off</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>P-Core</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>E-Core</string>
-                </property>
-               </item>
-              </widget>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="gb_model">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="font">
-             <font>
-              <family>LINE Seed Sans</family>
-              <pointsize>11</pointsize>
-             </font>
-            </property>
-            <property name="cursor">
-             <cursorShape>ArrowCursor</cursorShape>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: lightgray</string>
-            </property>
-            <property name="title">
-             <string>GPT Model</string>
-            </property>
-            <property name="flat">
-             <bool>false</bool>
-            </property>
-            <widget class="QGroupBox" name="groupBox">
-             <property name="geometry">
-              <rect>
-               <x>30</x>
-               <y>50</y>
-               <width>71</width>
-               <height>81</height>
-              </rect>
-             </property>
-             <property name="font">
-              <font>
-               <family>LINE Seed Sans</family>
-              </font>
-             </property>
-             <property name="title">
-              <string>3.5</string>
-             </property>
-             <widget class="QPushButton" name="pb_model1">
-              <property name="geometry">
-               <rect>
-                <x>10</x>
-                <y>20</y>
-                <width>51</width>
-                <height>51</height>
-               </rect>
-              </property>
-              <property name="cursor">
-               <cursorShape>PointingHandCursor</cursorShape>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;GPT 3.5 모델을 선택합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="icon">
-               <iconset>
-                <normaloff>logo/g_gpt-icon.png</normaloff>
-                <normalon>logo/gpt-icon.png</normalon>logo/g_gpt-icon.png</iconset>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>50</width>
-                <height>50</height>
-               </size>
-              </property>
-             </widget>
-            </widget>
-            <widget class="QGroupBox" name="groupBox_2">
-             <property name="geometry">
-              <rect>
-               <x>150</x>
-               <y>50</y>
-               <width>71</width>
-               <height>81</height>
-              </rect>
-             </property>
-             <property name="font">
-              <font>
-               <family>LINE Seed Sans</family>
-              </font>
-             </property>
-             <property name="title">
-              <string>4.0</string>
-             </property>
-             <widget class="QPushButton" name="pb_model2">
-              <property name="geometry">
-               <rect>
-                <x>10</x>
-                <y>20</y>
-                <width>51</width>
-                <height>51</height>
-               </rect>
-              </property>
-              <property name="cursor">
-               <cursorShape>PointingHandCursor</cursorShape>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;GPT 4.0 모델을 선택합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="icon">
-               <iconset>
-                <normaloff>logo/g_gpt-icon.png</normaloff>
-                <normalon>logo/gpt-icon.png</normalon>logo/g_gpt-icon.png</iconset>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>50</width>
-                <height>50</height>
-               </size>
-              </property>
-             </widget>
-            </widget>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="gb_powerc">
-            <property name="font">
-             <font>
-              <family>LINE Seed Sans</family>
-              <pointsize>11</pointsize>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;총 소비 전력을 표시합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="title">
-             <string>Total Power Comsumption</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="gb_readyq">
-            <property name="font">
-             <font>
-              <family>LINE Seed Sans</family>
-              <pointsize>11</pointsize>
-             </font>
-            </property>
-            <property name="cursor">
-             <cursorShape>ArrowCursor</cursorShape>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;작업 대기중인 프로세스들의 Queue를 표시합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="title">
-             <string>Ready Queue</string>
-            </property>
-            <property name="flat">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="gb_chart">
-            <property name="font">
-             <font>
-              <family>LINE Seed Sans</family>
-              <pointsize>11</pointsize>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;스케줄링 과정을 Gantt Chart로 가시화합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="title">
-             <string>Gantt Chart</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
        </layout>
       </item>
      </layout>
@@ -1325,7 +1550,7 @@
      <x>0</x>
      <y>0</y>
      <width>1920</width>
-     <height>22</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
