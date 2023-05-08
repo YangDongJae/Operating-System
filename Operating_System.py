@@ -1,5 +1,5 @@
 class Process:
-    def __init__(self, pid, arrival_time, burst_time, complexity):
+    def __init__(self, pid, arrival_time, burst_time, complexity, time_quantum):
         self.pid = pid
         self.burst_time = burst_time
         self.arrival_time = arrival_time
@@ -8,6 +8,7 @@ class Process:
         self.waiting_time = 0
         self.turnaround_time = 0
         self.complexity = complexity
+        self.time_quantum = time_quantum
 
 class Processor:
     def __init__(self, processor_id, core_type: str):
@@ -28,6 +29,12 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         self.process_queue = []
         self.ready_queue = []
         self.completed_processes = []
+        self.time_quantum_table = {
+            (1, 10):  2,
+            (11, 20): 4,
+            (21, 30): 6,
+            (31, 45): 8,
+        }
 
     def add_process(self, process):
         self.process_queue.append(process)
@@ -46,10 +53,15 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                 self.process_queue.remove(process)
                 self.ready_queue.append(process)
 
+            if self.ready_queue:
+                for(lower, upper), quantum in self.time_quantum_table.items():
+                    for process in self.ready_queue:
+                        if lower <= process.remaining_time <= upper:
+                            process.time_quantum = quantum
 
             if not processor0.current_process and self.ready_queue:
                 if processor0.core_type == "P":
-                    if self.ready_queue[0].remaining_time >= 1 and self.ready_queue[0].complexity > 4:
+                    if self.ready_queue[0].remaining_time > 1 and self.ready_queue[0].complexity > 4:
                         processor0.current_process = self.ready_queue.pop(0)
                 elif processor0.core_type == "E":
                     if self.ready_queue[0].remaining_time == 1 or self.ready_queue[0].complexity <= 4:
@@ -59,7 +71,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
 
             if not processor1.current_process and self.ready_queue:
                 if processor1.core_type == "P":
-                    if self.ready_queue[0].remaining_time >= 1 and self.ready_queue[0].complexity > 4:
+                    if self.ready_queue[0].remaining_time > 1 and self.ready_queue[0].complexity > 4:
                         processor1.current_process = self.ready_queue.pop(0)
                 elif processor1.core_type == "E":
                     if self.ready_queue[0].remaining_time == 1 or self.ready_queue[0].complexity <= 4:
@@ -69,7 +81,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
 
             if not processor2.current_process and self.ready_queue:
                 if processor2.core_type == "P":
-                    if self.ready_queue[0].remaining_time >= 1 and self.ready_queue[0].complexity > 4:
+                    if self.ready_queue[0].remaining_time > 1 and self.ready_queue[0].complexity > 4:
                         processor2.current_process = self.ready_queue.pop(0)
                 elif processor2.core_type == "E":
                     if self.ready_queue[0].remaining_time == 1 or self.ready_queue[0].complexity <= 4:
@@ -79,7 +91,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
 
             if not processor3.current_process and self.ready_queue:
                 if processor3.core_type == "P":
-                    if self.ready_queue[0].remaining_time >= 1 and self.ready_queue[0].complexity > 4:
+                    if self.ready_queue[0].remaining_time > 1 and self.ready_queue[0].complexity > 4:
                         processor3.current_process = self.ready_queue.pop(0)
                 elif processor3.core_type == "E":
                     if self.ready_queue[0].remaining_time == 1 or self.ready_queue[0].complexity <= 4:
@@ -147,7 +159,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     self.completed_processes.append(processor0.current_process)
                     processor0.current_process = None
                 elif processor0.current_process.remaining_time > 0:
-                    if (processor0.current_process.burst_time - processor0.current_process.remaining_time) % self.time_quantum == 0:
+                    if (processor0.current_process.burst_time - processor0.current_process.remaining_time) % processor0.current_process.time_quantum == 0:
                         self.ready_queue.append(processor0.current_process)
                         processor0.current_process = None
 
@@ -168,7 +180,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     self.completed_processes.append(processor1.current_process)
                     processor1.current_process = None
                 elif processor1.current_process.remaining_time > 0:
-                    if (processor1.current_process.burst_time - processor1.current_process.remaining_time) % self.time_quantum == 0:
+                    if (processor1.current_process.burst_time - processor1.current_process.remaining_time) % processor1.current_process.time_quantum == 0:
                         self.ready_queue.append(processor1.current_process)
                         processor1.current_process = None
 
@@ -189,7 +201,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     self.completed_processes.append(processor2.current_process)
                     processor2.current_process = None
                 elif processor2.current_process.remaining_time > 0:
-                    if (processor2.current_process.burst_time - processor2.current_process.remaining_time) % self.time_quantum == 0:
+                    if (processor2.current_process.burst_time - processor2.current_process.remaining_time) % processor2.current_process.time_quantum == 0:
                         self.ready_queue.append(processor2.current_process)
                         processor2.current_process = None
 
@@ -210,7 +222,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     self.completed_processes.append(processor3.current_process)
                     processor3.current_process = None
                 elif processor3.current_process.remaining_time > 0:
-                    if (processor3.current_process.burst_time - processor3.current_process.remaining_time) % self.time_quantum == 0:
+                    if (processor3.current_process.burst_time - processor3.current_process.remaining_time) % processor3.current_process.time_quantum == 0:
                         self.ready_queue.append(processor3.current_process)
                         processor3.current_process = None
 
@@ -228,8 +240,14 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
 
 
 def main():
-    processes = [Process(1, 0, 6, 4)]
-
+    time_quantum_table = {
+            (1,  10): 2,
+            (11, 20): 4,
+            (21, 30): 6,
+            (31, 45): 8,
+        }
+    processes = [Process(1, 0, 5, 5, 0)
+                 ]
     rr_algorithm = RoundRobinAlgorithm()
     for process in processes:
         rr_algorithm.add_process(process)
