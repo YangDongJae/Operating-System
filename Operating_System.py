@@ -1,5 +1,7 @@
+import random
+
 class Process:
-    def __init__(self, pid, arrival_time, burst_time, complexity, time_quantum):
+    def __init__(self, pid, arrival_time, burst_time, gpt_model, complexity, time_quantum):
         self.pid = pid
         self.burst_time = burst_time
         self.arrival_time = arrival_time
@@ -7,6 +9,7 @@ class Process:
         self.count = 0
         self.waiting_time = 0
         self.turnaround_time = 0
+        self.gpt_model = gpt_model
         self.complexity = complexity
         self.time_quantum = time_quantum
 
@@ -16,7 +19,7 @@ class Processor:
         self.core_type = core_type
         self.current_process = None
         self.power_on = False
-        self.power_usage = 0
+        self.power_usage = 0.0
 
 class SchedulingAlgorithm:
     def schedule(self):
@@ -28,6 +31,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         self.process_queue = []
         self.ready_queue = []
         self.completed_processes = []
+        self.outed_process=[]
         self.time_quantum_table = {
             (1, 10):  2,
             (11, 20): 4,
@@ -237,15 +241,47 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         print("P코어 총 전력 사용량:",P_cores_power_usage,"W")
         print("E코어 총 전력 사용량:",E_cores_power_usage,"W")
 
+class Main:
+    def __init__(self, N):
+        self.N = N
+        self.processes = []
+        self.rr_algorithm = RoundRobinAlgorithm()
+
+    def create_process(self):
+        for i in range(self.N):
+            pid = i + 1
+            arrival_time = random.randint(0,15)
+            gpt_model = random.choice(["GPT 4","GPT 3.5"])
+            complexity = random.randint(1,12)
+
+            if gpt_model == "GPT 4":
+                gpt_multiplier = 2
+            elif gpt_model == "GPT 3.5":
+                gpt_multiplier = 1
+
+            burst_time = complexity * gpt_multiplier
+            time_quantum = 0
+
+            process = Process(pid, arrival_time, burst_time, gpt_model, complexity, time_quantum)
+            self.processes.append(process)
+
+    def run_scheduler(self):
+        for process in self.processes:
+            self.rr_algorithm.add_process(process)
+        self.rr_algorithm.schedule()
+
+    def print_result(self):
+        self.rr_algorithm.print_results()
+            
 
 def main():
-    processes = [Process(1, 0, 15, 5, 0)]
-    rr_algorithm = RoundRobinAlgorithm()
-    for process in processes:
-        rr_algorithm.add_process(process)
+    N = 10
+    main_program = Main(N)
+    main_program.create_process()
+    main_program.run_scheduler()
+    main_program.print_result()
 
-    rr_algorithm.schedule()
-    rr_algorithm.print_results()
+
 
 if __name__ == "__main__":
     main()
