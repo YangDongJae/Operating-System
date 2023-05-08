@@ -165,7 +165,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                 if processor0.current_process.remaining_time <= 0:
                     processor0.current_process.waiting_time = (current_time - processor0.current_process.arrival_time - processor0.current_process.count + 1)
                     processor0.current_process.turnaround_time = (processor0.current_process.waiting_time + processor0.current_process.count)
-                    processor0.current_process.completed_time = current_time
+                    processor0.current_process.completed_time = current_time + 1
                     self.completed_processes.append(processor0.current_process)
                     processor0.current_process = None
                 elif processor0.current_process.remaining_time > 0:
@@ -187,7 +187,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                 if processor1.current_process.remaining_time <= 0:
                     processor1.current_process.waiting_time = (current_time - processor1.current_process.arrival_time - processor1.current_process.count + 1)
                     processor1.current_process.turnaround_time = processor1.current_process.waiting_time + processor1.current_process.count
-                    processor1.current_process.completed_time = current_time
+                    processor1.current_process.completed_time = current_time + 1
                     self.completed_processes.append(processor1.current_process)
                     processor1.current_process = None
                 elif processor1.current_process.remaining_time > 0:
@@ -209,7 +209,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                 if processor2.current_process.remaining_time <= 0:
                     processor2.current_process.waiting_time = (current_time - processor2.current_process.arrival_time - processor2.current_process.count + 1)
                     processor2.current_process.turnaround_time = (processor2.current_process.waiting_time + processor2.current_process.count)
-                    processor2.current_process.completed_time = current_time
+                    processor2.current_process.completed_time = current_time + 1
                     self.completed_processes.append(processor2.current_process)
                     processor2.current_process = None
                 elif processor2.current_process.remaining_time > 0:
@@ -231,7 +231,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                 if processor3.current_process.remaining_time <= 0:
                     processor3.current_process.waiting_time = (current_time - processor3.current_process.arrival_time - processor3.current_process.count + 1)
                     processor3.current_process.turnaround_time = (processor3.current_process.waiting_time + processor3.current_process.count)
-                    processor3.current_process.completed_time = current_time
+                    processor3.current_process.completed_time = current_time + 1
                     self.completed_processes.append(processor3.current_process)
                     processor3.current_process = None
                 elif processor3.current_process.remaining_time > 0:
@@ -243,9 +243,9 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
             current_time += 1
 
     def print_results(self):
-        print("Process ID | Arrival Time | Burst Time  | Waiting Time | Turnaround Time | Completed Time")
+        print("Process ID | GPT Mdel | Complexity | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time")
         for process in self.completed_processes:
-            print(f"{process.pid} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time}")
+            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time}")
         P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
         E_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "E"])
         print("P코어 총 전력 사용량:",P_cores_power_usage,"W")
