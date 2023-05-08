@@ -332,6 +332,12 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
 
 
 class MainProgram:
+    def random_num_generator(self, M):
+        nums = set() 
+        while len(nums) != M: 
+            nums.add(random.randint(1, M))
+        return list(nums)
+        
     def __init__(self, N: int, P: int):
         self.N = N  # 프로세스 개수
         self.P = P  # 프로세서 개수
@@ -340,8 +346,10 @@ class MainProgram:
 
     def create_processes(self):
         # 각 프로세스를 생성하고 프로세스 목록에 추가
-        AT_TIMES = [1,2,3,4,100]
+        # AT_TIMES = [1,2,3,4,100]
         # AT_TIMES = list(range(0,100))
+        AT_TIMES = self.random_num_generator(100)
+        
         # BT_ITEMS = [3,1,9]
         for i in range(self.N):
             process_id = i + 1
@@ -372,7 +380,7 @@ class MainProgram:
         self.scheduler.print_results()
 
 def main():
-    N = 5  # 프로세스 개수
+    N = 50  # 프로세스 개수
     P = 4  # 프로세서 개수
 
     main_program = MainProgram(N, P)
