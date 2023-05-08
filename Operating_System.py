@@ -239,14 +239,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
 
 
 def main():
-    time_quantum_table = {
-            (1,  10): 2,
-            (11, 20): 4,
-            (21, 30): 6,
-            (31, 45): 8,
-        }
-    processes = [Process(1, 0, 15, 5, 0)
-                 ]
+    processes = [Process(1, 0, 15, 5, 0)]
     rr_algorithm = RoundRobinAlgorithm()
     for process in processes:
         rr_algorithm.add_process(process)
