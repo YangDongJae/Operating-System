@@ -264,7 +264,7 @@ class Main:
             pid = i + 1
             arrival_time = random.randint(0,15)
             gpt_model = random.choice(["GPT 4","GPT 3.5"])
-            complexity = random.randint(1,12)
+            complexity = random.randint(1,20)
 
             if gpt_model == "GPT 4":
                 gpt_multiplier = 2
