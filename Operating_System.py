@@ -23,8 +23,7 @@ class SchedulingAlgorithm:
         raise NotImplementedError("schedule method must be implemented by a subclass")
 
 class RoundRobinAlgorithm(SchedulingAlgorithm):
-    def __init__(self, time_quantum=2):
-        self.time_quantum = time_quantum
+    def __init__(self):
         self.processors = [Processor(0,"P"),Processor(1,"P"),Processor(2,"P"),Processor(3,"E")]
         self.process_queue = []
         self.ready_queue = []
@@ -246,7 +245,7 @@ def main():
             (21, 30): 6,
             (31, 45): 8,
         }
-    processes = [Process(1, 0, 5, 5, 0)
+    processes = [Process(1, 0, 15, 5, 0)
                  ]
     rr_algorithm = RoundRobinAlgorithm()
     for process in processes:
