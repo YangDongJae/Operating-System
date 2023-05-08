@@ -243,7 +243,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
             current_time += 1
 
     def print_results(self):
-        print("Process ID | GPT Mdel | Complexity | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time")
+        print("Process ID | GPT Model | Complexity | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time")
         for process in self.completed_processes:
             print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time}")
         P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
