@@ -169,20 +169,20 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     processor0.power_usage += 3
                 elif processor0.core_type == "E":
                     processor0.power_usage += 1
-                if processor0.current_process.remaining_time <= 0:
+                if processor0.current_process.count >= 10:
+                    processor0.current_process.waiting_time = (current_time - processor0.current_process.arrival_time - processor0.current_process.count + 1)
+                    processor0.current_process.turnaround_time = (processor0.current_process.waiting_time + processor0.current_process.count)
+                    processor0.current_process.completed_time = current_time + 1
+                    self.outed_processes.append(processor0.current_process)
+                    processor0.current_process = None
+                elif processor0.current_process.remaining_time <= 0:
                     processor0.current_process.waiting_time = (current_time - processor0.current_process.arrival_time - processor0.current_process.count + 1)
                     processor0.current_process.turnaround_time = (processor0.current_process.waiting_time + processor0.current_process.count)
                     processor0.current_process.completed_time = current_time + 1
                     self.completed_processes.append(processor0.current_process)
                     processor0.current_process = None
                 elif processor0.current_process.remaining_time > 0:
-                    if processor0.current_process.count >= 10:
-                        processor0.current_process.waiting_time = (current_time - processor0.current_process.arrival_time - processor0.current_process.count + 1)
-                        processor0.current_process.turnaround_time = (processor0.current_process.waiting_time + processor0.current_process.count)
-                        processor0.current_process.completed_time = current_time + 1
-                        self.outed_processes.append(processor0.current_process)
-                        processor0.current_process = None
-                    elif (processor0.current_process.burst_time - processor0.current_process.remaining_time) % processor0.current_process.time_quantum == 0:
+                    if (processor0.current_process.burst_time - processor0.current_process.remaining_time) % processor0.current_process.time_quantum == 0:
                         self.ready_queue.append(processor0.current_process)
                         processor0.current_process = None
 
@@ -196,20 +196,20 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     processor1.power_usage += 3
                 elif processor1.core_type == "E":
                     processor1.power_usage += 1
-                if processor1.current_process.remaining_time <= 0:
+                if processor1.current_process.count >= 10:
+                    processor1.current_process.waiting_time = (current_time - processor1.current_process.arrival_time - processor1.current_process.count + 1)
+                    processor1.current_process.turnaround_time = processor1.current_process.waiting_time + processor1.current_process.count
+                    processor1.current_process.completed_time = current_time + 1
+                    self.outed_processes.append(processor1.current_process)
+                    processor1.current_process = None
+                elif processor1.current_process.remaining_time <= 0:
                     processor1.current_process.waiting_time = (current_time - processor1.current_process.arrival_time - processor1.current_process.count + 1)
                     processor1.current_process.turnaround_time = processor1.current_process.waiting_time + processor1.current_process.count
                     processor1.current_process.completed_time = current_time + 1
                     self.completed_processes.append(processor1.current_process)
                     processor1.current_process = None
                 elif processor1.current_process.remaining_time > 0:
-                    if processor1.current_process.count >= 10:
-                        processor1.current_process.waiting_time = (current_time - processor1.current_process.arrival_time - processor1.current_process.count + 1)
-                        processor1.current_process.turnaround_time = (processor1.current_process.waiting_time + processor1.current_process.count)
-                        processor1.current_process.completed_time = current_time + 1
-                        self.outed_processes.append(processor1.current_process)
-                        processor1.current_process = None
-                    elif (processor1.current_process.burst_time - processor1.current_process.remaining_time) % processor1.current_process.time_quantum == 0:
+                    if (processor1.current_process.burst_time - processor1.current_process.remaining_time) % processor1.current_process.time_quantum == 0:
                         self.ready_queue.append(processor1.current_process)
                         processor1.current_process = None
 
@@ -224,20 +224,20 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     processor2.power_usage += 3
                 elif processor2.core_type == "E":
                     processor2.power_usage += 1
-                if processor2.current_process.remaining_time <= 0:
+                if processor2.current_process.count >= 10:
+                    processor2.current_process.waiting_time = (current_time - processor2.current_process.arrival_time - processor2.current_process.count + 1)
+                    processor2.current_process.turnaround_time = (processor2.current_process.waiting_time + processor2.current_process.count)
+                    processor2.current_process.completed_time = current_time + 1
+                    self.outed_processes.append(processor2.current_process)
+                    processor2.current_process = None
+                elif processor2.current_process.remaining_time <= 0:
                     processor2.current_process.waiting_time = (current_time - processor2.current_process.arrival_time - processor2.current_process.count + 1)
                     processor2.current_process.turnaround_time = (processor2.current_process.waiting_time + processor2.current_process.count)
                     processor2.current_process.completed_time = current_time + 1
                     self.completed_processes.append(processor2.current_process)
                     processor2.current_process = None
                 elif processor2.current_process.remaining_time > 0:
-                    if processor2.current_process.count >= 10:
-                        processor2.current_process.waiting_time = (current_time - processor2.current_process.arrival_time - processor2.current_process.count + 1)
-                        processor2.current_process.turnaround_time = (processor2.current_process.waiting_time + processor2.current_process.count)
-                        processor2.current_process.completed_time = current_time + 1
-                        self.outed_processes.append(processor2.current_process)
-                        processor2.current_process = None
-                    elif (processor2.current_process.burst_time - processor2.current_process.remaining_time) % processor2.current_process.time_quantum == 0:
+                    if (processor2.current_process.burst_time - processor2.current_process.remaining_time) % processor2.current_process.time_quantum == 0:
                         self.ready_queue.append(processor2.current_process)
                         processor2.current_process = None
 
@@ -251,23 +251,22 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     processor3.power_usage += 3
                 elif processor3.core_type == "E":
                     processor3.power_usage += 1
-                if processor3.current_process.remaining_time <= 0:
+                if processor3.current_process.count >= 10:
+                    processor3.current_process.waiting_time = (current_time - processor3.current_process.arrival_time - processor3.current_process.count + 1)
+                    processor3.current_process.turnaround_time = (processor3.current_process.waiting_time + processor3.current_process.count)
+                    processor3.current_process.completed_time = current_time + 1
+                    self.outed_processes.append(processor3.current_process)
+                    processor3.current_process = None
+                elif processor3.current_process.remaining_time <= 0:
                     processor3.current_process.waiting_time = (current_time - processor3.current_process.arrival_time - processor3.current_process.count + 1)
                     processor3.current_process.turnaround_time = (processor3.current_process.waiting_time + processor3.current_process.count)
                     processor3.current_process.completed_time = current_time + 1
                     self.completed_processes.append(processor3.current_process)
                     processor3.current_process = None
                 elif processor3.current_process.remaining_time > 0:
-                    if processor3.current_process.count >= 10:
-                        processor3.current_process.waiting_time = (current_time - processor3.current_process.arrival_time - processor3.current_process.count + 1)
-                        processor3.current_process.turnaround_time = (processor3.current_process.waiting_time + processor3.current_process.count)
-                        processor3.current_process.completed_time = current_time + 1
-                        self.outed_processes.append(processor3.current_process)
-                        processor3.current_process = None
-                    elif (processor3.current_process.burst_time - processor3.current_process.remaining_time) % processor3.current_process.time_quantum == 0:
+                    if (processor3.current_process.burst_time - processor3.current_process.remaining_time) % processor3.current_process.time_quantum == 0:
                         self.ready_queue.append(processor3.current_process)
                         processor3.current_process = None
-
 
 
             current_time += 1
@@ -329,4 +328,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
