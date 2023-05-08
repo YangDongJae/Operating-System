@@ -1,5 +1,5 @@
 class Process:
-    def __init__(self, pid, arrival_time, burst_time):
+    def __init__(self, pid, arrival_time, burst_time, complexity):
         self.pid = pid
         self.burst_time = burst_time
         self.arrival_time = arrival_time
@@ -7,6 +7,7 @@ class Process:
         self.count = 0
         self.waiting_time = 0
         self.turnaround_time = 0
+        self.complexity = complexity
 
 class Processor:
     def __init__(self, processor_id, core_type: str):
@@ -47,16 +48,44 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
 
 
             if not processor0.current_process and self.ready_queue:
-                processor0.current_process = self.ready_queue.pop(0)
+                if processor0.core_type == "P":
+                    if self.ready_queue[0].remaining_time >= 1 and self.ready_queue[0].complexity > 4:
+                        processor0.current_process = self.ready_queue.pop(0)
+                elif processor0.core_type == "E":
+                    if self.ready_queue[0].remaining_time == 1 or self.ready_queue[0].complexity <= 4:
+                        processor0.current_process = self.ready_queue.pop(0)
+                    elif processor1.current_process and processor2.current_process and processor3.current_process:
+                        processor0.current_process = self.ready_queue.pop(0)
 
             if not processor1.current_process and self.ready_queue:
-                processor1.current_process = self.ready_queue.pop(0)
+                if processor1.core_type == "P":
+                    if self.ready_queue[0].remaining_time >= 1 and self.ready_queue[0].complexity > 4:
+                        processor1.current_process = self.ready_queue.pop(0)
+                elif processor1.core_type == "E":
+                    if self.ready_queue[0].remaining_time == 1 or self.ready_queue[0].complexity <= 4:
+                        processor1.current_process = self.ready_queue.pop(0)
+                    elif processor0.current_process and processor2.current_process and processor3.current_process:
+                        processor1.current_process = self.ready_queue.pop(0)
 
             if not processor2.current_process and self.ready_queue:
-                processor2.current_process = self.ready_queue.pop(0)
+                if processor2.core_type == "P":
+                    if self.ready_queue[0].remaining_time >= 1 and self.ready_queue[0].complexity > 4:
+                        processor2.current_process = self.ready_queue.pop(0)
+                elif processor2.core_type == "E":
+                    if self.ready_queue[0].remaining_time == 1 or self.ready_queue[0].complexity <= 4:
+                        processor2.current_process = self.ready_queue.pop(0)
+                    elif processor0.current_process and processor1.current_process and processor3.current_process:
+                        processor2.current_process = self.ready_queue.pop(0)
 
             if not processor3.current_process and self.ready_queue:
-                processor3.current_process = self.ready_queue.pop(0)
+                if processor3.core_type == "P":
+                    if self.ready_queue[0].remaining_time >= 1 and self.ready_queue[0].complexity > 4:
+                        processor3.current_process = self.ready_queue.pop(0)
+                elif processor3.core_type == "E":
+                    if self.ready_queue[0].remaining_time == 1 or self.ready_queue[0].complexity <= 4:
+                        processor3.current_process = self.ready_queue.pop(0)
+                    elif processor0.current_process and processor1.current_process and processor2.current_process:
+                        processor3.current_process = self.ready_queue.pop(0)
 
             if processor0.current_process:
                 if processor0.power_on == False:
@@ -199,7 +228,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
 
 
 def main():
-    processes = [Process(1, 0, 6)]
+    processes = [Process(1, 0, 6, 4)]
 
     rr_algorithm = RoundRobinAlgorithm()
     for process in processes:
