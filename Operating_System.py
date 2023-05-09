@@ -1,5 +1,3 @@
-import random
-
 class Process:
     def __init__(self, pid, arrival_time, burst_time, completed_time, gpt_model, complexity, time_quantum):
         self.pid = pid
@@ -298,12 +296,12 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
             current_time += 1
 
     def print_results(self):
-        print("Process ID | GPT Model | Complexity | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time | Working Time")
+        print("Process ID | GPT Model | Complexity | Arrival Time | Burst Time | Working Time | Waiting Time | Turnaround Time | Completed Time")
         for process in self.completed_processes:
-            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.count}")
+            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.count} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time}")
         print("<아웃된 프로세스>")
         for process in self.outed_processes:
-            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.count}")
+            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.count} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time}")
         P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
         E_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "E"])
         print("P코어 총 전력 사용량:",round(P_cores_power_usage, 1),"W")
@@ -315,24 +313,20 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         print("프로세서 3에서 작업한 프로세스:", self.processor3_queue)
 
 class Main:
-    def __init__(self,processor_select_signal, N):
-        self.N = N
+    def __init__(self, process_select_signal, processor_select_signal):
         self.processes = []
+        self.process_select_signal = process_select_signal
         self.rr_algorithm = RoundRobinAlgorithm(processor_select_signal)
 
     def create_process(self):
-        for i in range(self.N):
-            pid = i + 1
-            arrival_time = random.randint(0,15)
-            gpt_model = random.choice(["GPT 4","GPT 3.5"])
-            complexity = random.randint(1,12)
+        for i in self.process_select_signal:
+            pid = i[0]
+            arrival_time = i[1]
+            burst_time = i[2]
 
-            if gpt_model == "GPT 4":
-                gpt_multiplier = 2
-            elif gpt_model == "GPT 3.5":
-                gpt_multiplier = 1
+            gpt_model = i[3]
+            complexity = i[4]
 
-            burst_time = complexity * gpt_multiplier
             time_quantum = 0
             completed_time = 0
 
@@ -349,9 +343,25 @@ class Main:
             
 
 def main():
+    process_select_signal = [[1, 1, 6, "GPT 3.5", 6],
+                             [2, 12, 20, "GPT 4", 10],
+                             [3, 7, 3, "GPT 3.5", 3],
+                             [4, 16, 16, "GPT 4", 8],
+                             [5, 8 ,18, "GPT 4", 9],
+                             [6, 2, 8, "GPT 3.5", 8],
+                             [7, 15, 6, "GPT 4", 3],
+                             [8, 7, 2, "GPT 3.5", 2],
+                             [9, 3, 1, "GPT 3.5", 1],
+                             [10, 0, 14, "GPT 4", 7],
+                             [11, 1, 12, "GPT 4", 6],
+                             [12, 13, 9, "GPT 3.5", 9],
+                             [13, 5, 24, "GPT 4", 12],
+                             [14, 4, 11, "GPT 3.5", 11],
+                             [15, 11, 10, "GPT 4", 5]]
+
     processor_select_signal = [1, 1, 1, 2]
-    N = 15
-    main_program = Main(processor_select_signal, N)
+
+    main_program = Main(process_select_signal, processor_select_signal)
     main_program.create_process()
     main_program.run_scheduler()
     main_program.print_result()
