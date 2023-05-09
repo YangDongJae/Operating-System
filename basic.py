@@ -159,7 +159,6 @@ class FCFS(SchedulingAlgorithm):
                     processor0.power_usage += 1
                 
                 
-                #RT(Remaining Time)가 1이면 레디큐로 0번째로 올리기
                 
 
                 elif processor0.current_process.remaining_time <= 0:  #남은시간이 0보다 작으면 완료니까 WT TT 계산 후 Cp에 올리기
