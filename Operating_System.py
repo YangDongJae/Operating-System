@@ -79,7 +79,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                         if lower <= process.remaining_time <= upper:
                             process.time_quantum = quantum
 
-            if not processor0.current_process and self.ready_queue:
+            if not processor0.current_process and not processor0.core_type == None and self.ready_queue:
                 if processor0.core_type == "P":
                     if self.ready_queue[0].remaining_time > 1 and self.ready_queue[0].complexity > 4:
                         processor0.current_process = self.ready_queue.pop(0)
@@ -89,7 +89,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     elif processor1.current_process and processor2.current_process and processor3.current_process:
                         processor0.current_process = self.ready_queue.pop(0)
 
-            if not processor1.current_process and self.ready_queue:
+            if not processor1.current_process and not processor1.core_type == None and self.ready_queue:
                 if processor1.core_type == "P":
                     if self.ready_queue[0].remaining_time > 1 and self.ready_queue[0].complexity > 4:
                         processor1.current_process = self.ready_queue.pop(0)
@@ -99,7 +99,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     elif processor0.current_process and processor2.current_process and processor3.current_process:
                         processor1.current_process = self.ready_queue.pop(0)
 
-            if not processor2.current_process and self.ready_queue:
+            if not processor2.current_process and not processor2.core_type == None and self.ready_queue:
                 if processor2.core_type == "P":
                     if self.ready_queue[0].remaining_time > 1 and self.ready_queue[0].complexity > 4:
                         processor2.current_process = self.ready_queue.pop(0)
@@ -109,7 +109,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                     elif processor0.current_process and processor1.current_process and processor3.current_process:
                         processor2.current_process = self.ready_queue.pop(0)
 
-            if not processor3.current_process and self.ready_queue:
+            if not processor3.current_process and not processor3.core_type == None and self.ready_queue:
                 if processor3.core_type == "P":
                     if self.ready_queue[0].remaining_time > 1 and self.ready_queue[0].complexity > 4:
                         processor3.current_process = self.ready_queue.pop(0)
@@ -350,7 +350,7 @@ class Main:
 
 def main():
     processor_select_signal = [1, 1, 1, 2]
-    N = 10
+    N = 15
     main_program = Main(processor_select_signal, N)
     main_program.create_process()
     main_program.run_scheduler()
