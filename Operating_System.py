@@ -52,6 +52,11 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
             (31, float('inf')): 8
         }
 
+        self.processor0_queue = []
+        self.processor1_queue = []
+        self.processor2_queue = []
+        self.processor3_queue = []
+
     def add_process(self, process):
         self.process_queue.append(process)
 
@@ -61,7 +66,6 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         processor1 = self.processors[1]
         processor2 = self.processors[2]
         processor3 = self.processors[3]
-        print(processor0.core_type,processor1.core_type,processor2.core_type,processor3.core_type)
 
         while self.process_queue or self.ready_queue or processor0.current_process or processor1.current_process or processor2.current_process or processor3.current_process:
             incoming_processes = [proc for proc in self.process_queue if proc.arrival_time == current_time]
@@ -116,6 +120,27 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                         processor3.current_process = self.ready_queue.pop(0)
 
             if processor0.current_process:
+                self.processor0_queue.append(processor0.current_process.pid)
+            else:
+                self.processor0_queue.append(0)
+
+            if processor1.current_process:
+                self.processor1_queue.append(processor1.current_process.pid)
+            else:
+                self.processor1_queue.append(0)
+
+            if processor2.current_process:
+                self.processor2_queue.append(processor2.current_process.pid)
+            else:
+                self.processor2_queue.append(0)
+
+            if processor3.current_process:
+                self.processor3_queue.append(processor3.current_process.pid)
+            else:
+                self.processor3_queue.append(0)
+
+
+            if processor0.current_process:
                 if processor0.power_on == False:
                     processor0.power_on = True
                     if processor0.core_type == "P":
@@ -158,6 +183,8 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
             elif not processor3.current_process:
                 if processor3.power_on == True:
                     processor3.power_on = False
+
+            
 
             if processor0.current_process:
                 processor0.current_process.count += 1
@@ -268,7 +295,6 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
                         self.ready_queue.append(processor3.current_process)
                         processor3.current_process = None
 
-
             current_time += 1
 
     def print_results(self):
@@ -280,8 +306,13 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
             print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.count}")
         P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
         E_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "E"])
-        print("P코어 총 전력 사용량:",P_cores_power_usage,"W")
-        print("E코어 총 전력 사용량:",E_cores_power_usage,"W")
+        print("P코어 총 전력 사용량:",round(P_cores_power_usage, 1),"W")
+        print("E코어 총 전력 사용량:",round(E_cores_power_usage, 1),"W")
+        print("총 전력 사용량:",round(P_cores_power_usage+E_cores_power_usage, 1),"W")
+        print("프로세서 0에서 작업한 프로세스:", self.processor0_queue)
+        print("프로세서 1에서 작업한 프로세스:", self.processor1_queue)
+        print("프로세서 2에서 작업한 프로세스:", self.processor2_queue)
+        print("프로세서 3에서 작업한 프로세스:", self.processor3_queue)
 
 class Main:
     def __init__(self,processor_select_signal, N):
@@ -294,7 +325,7 @@ class Main:
             pid = i + 1
             arrival_time = random.randint(0,15)
             gpt_model = random.choice(["GPT 4","GPT 3.5"])
-            complexity = random.randint(1,15)
+            complexity = random.randint(1,12)
 
             if gpt_model == "GPT 4":
                 gpt_multiplier = 2
@@ -319,7 +350,7 @@ class Main:
 
 def main():
     processor_select_signal = [1, 1, 1, 2]
-    N = 20
+    N = 10
     main_program = Main(processor_select_signal, N)
     main_program.create_process()
     main_program.run_scheduler()
