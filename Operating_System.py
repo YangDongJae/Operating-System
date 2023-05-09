@@ -26,13 +26,13 @@ class SchedulingAlgorithm:
     def __init__(self, processor_select_signal):
         self.processors = []
 
-        for signal in processor_select_signal:
-            if signal == 0:
-                self.processors.append(Processor(signal, None))
-            elif signal == 1:
-                self.processors.append(Processor(signal, "P"))
-            elif signal == 2:
-                self.processors.append(Processor(signal, "E"))
+        for i in range(len(processor_select_signal)):
+            if processor_select_signal[i] == 0:
+                self.processors.append(Processor(i, None))
+            elif processor_select_signal[i] == 1:
+                self.processors.append(Processor(i, "P"))
+            elif processor_select_signal[i] == 2:
+                self.processors.append(Processor(i, "E"))
 
 
     def schedule(self):
@@ -61,7 +61,7 @@ class RoundRobinAlgorithm(SchedulingAlgorithm):
         processor1 = self.processors[1]
         processor2 = self.processors[2]
         processor3 = self.processors[3]
-
+        print(processor0.core_type,processor1.core_type,processor2.core_type,processor3.core_type)
 
         while self.process_queue or self.ready_queue or processor0.current_process or processor1.current_process or processor2.current_process or processor3.current_process:
             incoming_processes = [proc for proc in self.process_queue if proc.arrival_time == current_time]
