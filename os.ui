@@ -48,7 +48,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="6,7">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout" stretch="1,12,3,12">
+         <layout class="QVBoxLayout" name="verticalLayout" stretch="1,12,3,1,11">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,3">
             <item>
@@ -672,20 +672,20 @@
            </widget>
           </item>
           <item>
-           <widget class="QGroupBox" name="gb_chart">
+           <widget class="QLabel" name="lb_gantt">
             <property name="font">
              <font>
               <family>LINE Seed Sans</family>
               <pointsize>11</pointsize>
              </font>
             </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;스케줄링 과정을 Gantt Chart로 가시화합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="title">
+            <property name="text">
              <string>Gantt Chart</string>
             </property>
            </widget>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="tableWidget"/>
           </item>
          </layout>
         </item>

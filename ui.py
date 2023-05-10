@@ -59,6 +59,8 @@ class OS_Scheduler(QMainWindow, form_class):
         self.addArrivalTime = 0
         self.addBurstTime = 0
 
+        self.existing_colors = []
+
         # selected = 클릭한 model과 complex, gpt_model, gpt_complex = 최종 결정한 결과
         # model : 3.5 = 1, 4.0 = 2, complex : high = 9, mid = 5, low = 1
         self.gpt_selected = []
@@ -152,10 +154,9 @@ class OS_Scheduler(QMainWindow, form_class):
                 self.addBurstTime -= 1
             self.lb_add_process_bt.setText(f"{self.addBurstTime:02}")
         elif flag == 7:  # reset
-            self.addProcessName = 0
+            self.updateProcessNameFunction()
             self.addArrivalTime = 0
             self.addBurstTime = 0
-            self.lb_add_process.setText(f"P{self.addProcessName:02}")
             self.lb_add_process_at.setText(f"{self.addArrivalTime:02}")
             self.lb_add_process_bt.setText(f"{self.addBurstTime:02}")
         elif flag == 8:  # save
@@ -245,7 +246,7 @@ class OS_Scheduler(QMainWindow, form_class):
                 self.scheduler.remove_process(process_id)
             self.tw_process.removeRow(row)
             self.updateProcessNameFunction()
-            
+
         if len(selected_rows) == 0:
             QMessageBox.warning(self, '삭제 실패', f'선택된 행이 없습니다.')
         self.pb_remove.setVisible(False)
