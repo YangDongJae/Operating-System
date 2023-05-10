@@ -49,6 +49,21 @@ class SchedulingAlgorithm:
 
     def schedule(self):
         raise NotImplementedError("schedule method must be implemented by a subclass")
+    
+    def print_results(self):
+        
+        print("Process ID  Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time")
+        for process in self.completed_processes:
+            print(f"{process.pid} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time}")
+        P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
+        E_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "E"])
+        print("P코어 총 전력 사용량:",P_cores_power_usage,"W")
+        print("E코어 총 전력 사용량:",E_cores_power_usage,"W")
+        print("총 전력 사용량:",round(P_cores_power_usage+E_cores_power_usage, 1),"W")
+        print("프로세서 0에서 작업한 프로세스:", self.processor0_queue)
+        print("프로세서 1에서 작업한 프로세스:", self.processor1_queue)
+        print("프로세서 2에서 작업한 프로세스:", self.processor2_queue)
+        print("프로세서 3에서 작업한 프로세스:", self.processor3_queue)       
 
 class DynamicRoundRobinAlgorithm(SchedulingAlgorithm):
     def __init__(self, processor_select_signal):
@@ -67,7 +82,7 @@ class DynamicRoundRobinAlgorithm(SchedulingAlgorithm):
         self.processor0_queue = []
         self.processor1_queue = []
         self.processor2_queue = []
-        self.processor_queue = []
+        self.processor3_queue = []
 
     def add_process(self, process):
         self.process_queue.append(process)
@@ -81,7 +96,7 @@ class DynamicRoundRobinAlgorithm(SchedulingAlgorithm):
                 if ready_queue[0].remaining_time == 1 or ready_queue[0].complexity <= 4:
                     processor.current_process = ready_queue.pop(0)
                 elif all([p.current_process for p in processor_list]):
-                    processor.current_process = ready_queue.pop(0)                
+                    processor.current_process = ready_queue.pop(0)               
                 
     def handle_outed_process(self, processor, scheduler, current_time):
         processor.current_process.waiting_time = (current_time - processor.current_process.arrival_time - processor.current_process.count + 1)
@@ -127,9 +142,9 @@ class DynamicRoundRobinAlgorithm(SchedulingAlgorithm):
         processor0 = self.processors[0]
         processor1 = self.processors[1]
         processor2 = self.processors[2]
-        processor = self.processors[3]
+        processor3 = self.processors[3]
 
-        while self.process_queue or self.ready_queue or processor0.current_process or processor1.current_process or processor2.current_process or processor.current_process:
+        while self.process_queue or self.ready_queue or processor0.current_process or processor1.current_process or processor2.current_process or processor3.current_process:
             incoming_processes = [proc for proc in self.process_queue if proc.arrival_time == current_time]
             for process in incoming_processes:
                 self.process_queue.remove(process)
@@ -144,7 +159,7 @@ class DynamicRoundRobinAlgorithm(SchedulingAlgorithm):
             self.assign_process_to_processor(processor0, self.processors, self.ready_queue)
             self.assign_process_to_processor(processor1, self.processors, self.ready_queue)
             self.assign_process_to_processor(processor2, self.processors, self.ready_queue)
-            self.assign_process_to_processor(processor, self.processors, self.ready_queue)
+            self.assign_process_to_processor(processor3, self.processors, self.ready_queue)
 
             if processor0.current_process:
                 self.processor0_queue.append(processor0.current_process.pid)
@@ -161,23 +176,23 @@ class DynamicRoundRobinAlgorithm(SchedulingAlgorithm):
             else:
                 self.processor2_queue.append(0)
 
-            if processor.current_process:
-                self.processor_queue.append(processor.current_process.pid)
+            if processor3.current_process:
+                self.processor3_queue.append(processor3.current_process.pid)
             else:
-                self.processor_queue.append(0)
+                self.processor3_queue.append(0)
 
 
             processor0.update_power_status(processor0)
             processor1.update_power_status(processor1)
             processor2.update_power_status(processor2)
-            processor.update_power_status(processor)
+            processor3.update_power_status(processor3)
 
             
 
             self.update_current_process(processor0, self, current_time)
             self.update_current_process(processor1, self, current_time)
             self.update_current_process(processor2, self, current_time)
-            self.update_current_process(processor, self, current_time)
+            self.update_current_process(processor3, self, current_time)
 
 
             current_time += 1
@@ -197,7 +212,7 @@ class DynamicRoundRobinAlgorithm(SchedulingAlgorithm):
         print("프로세서 0에서 작업한 프로세스:", self.processor0_queue)
         print("프로세서 1에서 작업한 프로세스:", self.processor1_queue)
         print("프로세서 2에서 작업한 프로세스:", self.processor2_queue)
-        print("프로세서 3에서 작업한 프로세스:", self.processor_queue)
+        print("프로세서 3에서 작업한 프로세스:", self.processor3_queue)
         
 class FCFS(SchedulingAlgorithm):
     def __init__(self,processor_select_signal):    #p코어 e코어 갯수 입력 받음
@@ -209,7 +224,7 @@ class FCFS(SchedulingAlgorithm):
         self.processor0_queue = []
         self.processor1_queue = []
         self.processor2_queue = []
-        self.processor_queue = []
+        self.processor3_queue = []
                                             
     def add_process(self, process):         #프로세스 할당
         self.process_queue.append(process)  #프로세스 큐에 프로세스 추가 
@@ -238,11 +253,11 @@ class FCFS(SchedulingAlgorithm):
         processor0 = self.processors[0]     #0번째 프로세서
         processor1 = self.processors[1]     #1번째 프로세서
         processor2 = self.processors[2]     #2번째 프로세서
-        processor = self.processors[3]     #3번째 프로세서
+        processor3 = self.processors[3]     #3번째 프로세서
         
 
 
-        while self.process_queue or self.ready_queue or processor0.current_process or processor1.current_process or processor2.current_process or processor.current_process:
+        while self.process_queue or self.ready_queue or processor0.current_process or processor1.current_process or processor2.current_process or processor3.current_process:
             #프로세스큐, 레디큐, 각 프로세스 별로 원소들이 존재하면 반복
             incoming_processes = [proc for proc in self.process_queue if proc.arrival_time == current_time]
             #현재시간과 도착시간이 같은 프로세스 큐안에있는 프로세스들을 모아논 리스트
@@ -263,8 +278,8 @@ class FCFS(SchedulingAlgorithm):
                 processor2.current_process = self.ready_queue.pop(0)
                     
 
-            if not processor.current_process and not processor.core_type == None and self.ready_queue:
-                processor.current_process = self.ready_queue.pop(0)
+            if not processor3.current_process and not processor3.core_type == None and self.ready_queue:
+                processor3.current_process = self.ready_queue.pop(0)
                 
                     
             
@@ -283,40 +298,25 @@ class FCFS(SchedulingAlgorithm):
             else:
                 self.processor2_queue.append(0)
 
-            if processor.current_process:
-                self.processor_queue.append(processor.current_process.pid)
+            if processor3.current_process:
+                self.processor3_queue.append(processor3.current_process.pid)
             else:
-                self.processor_queue.append(0)
+                self.processor3_queue.append(0)
             #프로세서 별로 전력 계산
 
             processor0.update_power_status(processor0)
             processor1.update_power_status(processor1)
             processor2.update_power_status(processor2)
-            processor.update_power_status(processor)
+            processor3.update_power_status(processor3)
 
             #프로세스 처리 매 초마다
             self.update_current_process(processor0, current_time)
             self.update_current_process(processor1, current_time)
             self.update_current_process(processor2, current_time)
-            self.update_current_process(processor, current_time)
+            self.update_current_process(processor3, current_time)
 
             #한 주기 긑
-            current_time += 1
-            
-    def print_results(self):
-        
-        print("Process ID  Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time")
-        for process in self.completed_processes:
-            print(f"{process.pid} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time}")
-        P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
-        E_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "E"])
-        print("P코어 총 전력 사용량:",P_cores_power_usage,"W")
-        print("E코어 총 전력 사용량:",E_cores_power_usage,"W")
-        print("총 전력 사용량:",round(P_cores_power_usage+E_cores_power_usage, 1),"W")
-        print("프로세서 0에서 작업한 프로세스:", self.processor0_queue)
-        print("프로세서 1에서 작업한 프로세스:", self.processor1_queue)
-        print("프로세서 2에서 작업한 프로세스:", self.processor2_queue)
-        print("프로세서 3에서 작업한 프로세스:", self.processor_queue)   
+            current_time += 1   
 
 class RR(SchedulingAlgorithm):
     def __init__(self,processor_select_signal):    #p코어 e코어 갯수 입력 받음
@@ -339,15 +339,15 @@ class RR(SchedulingAlgorithm):
             processor.current_process.count += 1
             if processor.core_type == "P":
                 processor.current_process.remaining_time -= 2
-                processor.power_usage += 3
             elif processor.core_type == "E":
                 processor.current_process.remaining_time -= 1
+            if processor.core_type == "P":
+                processor.power_usage += 3
+            elif processor.core_type == "E":
                 processor.power_usage += 1
-            if processor.core_type == "E":
-                processor.current_process.count += 1
             if processor.current_process.remaining_time <= 0:
                 processor.current_process.waiting_time = (current_time - processor.current_process.arrival_time - processor.current_process.count + 1)
-                processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
+                processor.current_process.turnaround_time = processor.current_process.waiting_time + processor.current_process.count
                 processor.current_process.completed_time = current_time + 1
                 self.completed_processes.append(processor.current_process)
                 processor.current_process = None
@@ -803,7 +803,7 @@ class HRRN(SchedulingAlgorithm):
         print("프로세서 0에서 작업한 프로세스:", self.processor0_queue)
         print("프로세서 1에서 작업한 프로세스:", self.processor1_queue)
         print("프로세서 2에서 작업한 프로세스:", self.processor2_queue)
-        print("프로세서 3에서 작업한 프로세스:", self.processor3_queue)                    
+        print("프로세서 3에서 작업한 프로세스:", self.processor3_queue)
 #메인
 class Main:
     def __init__(self, processor_select_signal, N):
@@ -874,15 +874,15 @@ class Main:
     def print_result(self, version):                         #출력
         
         if version== "FCFS":
-            self.fcfs_algorithm.print_results()
+            super(FCFS,self.fcfs_algorithm).print_results()
         elif version== "SPN":
-            self.spn_algorithm.print_results()
+            super(SPN,self.spn_algorithm).print_results()
         elif version== "RR":
-            self.rr_algorithm.print_results()
+            super(RR,self.rr_algorithm).print_results()
         elif version=="SRTN":
-            self.srtn_algorithm.print_results()
+            super(SRTN,self.srtn_algorithm).print_results()
         elif version=="HRRN":
-            self.hrrn_algorithm.print_results()
+            super(HRRN,self.hrrn_algorithm).print_results()
         elif version=="DRR":
             self.drr_algorithm.print_results()            
 
@@ -891,7 +891,7 @@ class Main:
 
 def main(version, TQ=0):
         processor_select_signal = [1, 1, 1, 2]         #프로세서 p코어3개, e코어 1개 ,순서대로
-        N = 10
+        N = 5
         main_program = Main(processor_select_signal, N)
 
         if TQ==0:
@@ -904,5 +904,5 @@ def main(version, TQ=0):
             main_program.print_result(version)                     #출력
 
 if __name__ == "__main__":
-    main("HRRN")        #RR빼고 그냥 "FCFS", "SPN", "SRTN"
+    main("DRR")        #RR빼고 그냥 "FCFS", "SPN", "SRTN"
                         #RR은 Time Quantum값 지정 ex) main("RR",3)
