@@ -56,6 +56,11 @@ class OS_Scheduler(QMainWindow, form_class):
         self.addArrivalTime = 0
         self.addBurstTime = 0
 
+        # selected = 클릭한 model과 complex, gpt_model, gpt_complex = 최종 결정한 결과
+        # model : 3.5 = 1, 4.0 = 2, complex : high = 9, mid = 5, low = 1
+        self.gpt_selected = []
+        self.gpt_model = self.gpt_complex = -1
+
         self.setupUi(self)
         self.setWindowTitle('OS Scheduler')
         self.setWindowIcon(QIcon('logo/logo.png'))
@@ -177,6 +182,10 @@ class OS_Scheduler(QMainWindow, form_class):
                 item = self.tw_process.item(row_count, 0)
                 item.setBackground(color)
 
+    # DRR 알고리즘에서의 프로세스 추가
+    def GPTAddProcessFunction():
+        pass
+
     # del키로 프로세스 삭제
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Delete:
@@ -245,7 +254,17 @@ class OS_Scheduler(QMainWindow, form_class):
     # GPT 모델 선택
     def GPTSelectFunction(self, flag):
         pushbutton = self.sender()  # 이벤트를 발생시킨 버튼 객체 가져오기
+        
         if pushbutton.isChecked():  # 버튼을 누를 때
+            if len(self.gpt_selected) == 0:
+                self.gpt_selected.append((pushbutton, flag))
+            else:
+                # model 혹은 complex를 중복 선택했을 때의 예외처리
+                if (self.gpt_selected[0][1] <= 2 and flag <= 2) or (self.gpt_selected[0][1] > 2 and flag > 2):
+                    self.gpt_selected.clear()
+                self.gpt_selected.append((pushbutton, flag))
+
+            print(pushbutton.objectName(), self.gpt_selected)
             if flag <= 2:
                 subject = getattr(self, 'pb_model2') if flag == 1 else getattr(
                     self, 'pb_model1')
@@ -264,14 +283,55 @@ class OS_Scheduler(QMainWindow, form_class):
                     else:
                         button.setIcon(QIcon('logo/g_complex.png'))
                         button.setChecked(False)
-                        
+
         else:  # 버튼을 해제할 때
             if flag <= 2:
                 pushbutton.setIcon(QIcon('logo/g_gpt-icon.png'))
+                if self.gpt_model != -1:
+                    self.gpt_model == -1
             else:
                 pushbutton.setIcon(QIcon('logo/g_complex.png'))
+                if self.gpt_complex != -1:
+                    self.gpt_complex == -1
+            # 객체 이름 비교, gpt_selected 리스트 내부의 tuple 삭제 (object, flag)
+            for tup in self.gpt_selected:
+                if tup[0].objectName() == pushbutton.objectName():
+                    self.gpt_selected.remove(tup)
+            print(self.gpt_selected)
+
+        # model과 complex를 모두 선정 완료했을 때
+        if len(self.gpt_selected) == 2:
+            name = [0] * 2
+            for tup in self.gpt_selected:
+                flag = tup[1]
+                if flag <= 2:
+                    self.gpt_model = flag
+                    name[0] = 3.0 + float(flag / 2)
+                else:
+                    if flag == 3: # high
+                        self.gpt_complex = 9
+                        name[1] = "High"
+                    elif flag == 4: # mid
+                        self.gpt_complex = 5
+                        name[1] = "Mid"
+                    else: # low
+                        self.gpt_complex = 1
+                        name[1] = "Low"
+            reply = QMessageBox.question(self, '프로세스 생성', f'선택한 GPT 모델({name[0]})과 복잡도({name[1]})를 이용해서 프로세스들을 생성하시겠습니까?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             
 
+            if reply == QMessageBox.Yes:
+                pass
+            else:
+                for tup in self.gpt_selected:
+                    if tup[1] <= 2:
+                        tup[0].setIcon(QIcon('logo/g_gpt-icon.png'))
+                    else:
+                        tup[0].setIcon(QIcon('logo/g_complex.png'))
+                    tup[0].setChecked(False)
+                    print(tup[0].objectName(),"이 해제되었습니다.")
+                    self.gpt_model = self.gpt_complex = -1
+                self.gpt_selected.clear()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -1300,8 +1300,7 @@
                 </property>
                 <property name="icon">
                  <iconset>
-                  <normaloff>logo/g_gpt-icon.png</normaloff>
-                  <normalon>logo/gpt-icon.png</normalon>logo/g_gpt-icon.png</iconset>
+                  <normaloff>logo/g_gpt-icon.png</normaloff>logo/g_gpt-icon.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
