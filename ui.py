@@ -38,6 +38,9 @@ class ProcessScheduler:
             if process.process_id == process_id:
                 return process.color
         return None
+    
+    def get_processes_length(self):
+        return len(self.processes)
 
     def print_processes(self):
         print("Process List:")
@@ -150,9 +153,9 @@ class OS_Scheduler(QMainWindow, form_class):
             self.lb_add_process_at.setText(f"{self.addArrivalTime:02}")
             self.lb_add_process_bt.setText(f"{self.addBurstTime:02}")
         elif flag == 8:  # save
-            pid = f"P{self.addProcessName:02}"
-            at = f"{self.addArrivalTime}"
-            bt = f"{self.addBurstTime}"
+            pid = self.addProcessName
+            at = self.addArrivalTime
+            bt = self.addBurstTime
 
             # 이미 동일한 pid가 processes에 있는지 확인
             pid_exists = any(process.process_id ==
@@ -167,32 +170,44 @@ class OS_Scheduler(QMainWindow, form_class):
             elif int(bt) <= 0:
                 QMessageBox.warning(self, "추가 실패", "Burst Time은 0일 수 없습니다.")
             else:
-                row_count = self.tw_process.rowCount()
-                self.tw_process.insertRow(row_count)
-                self.tw_process.setItem(row_count, 0, QTableWidgetItem(pid))
-                self.tw_process.setItem(row_count, 1, QTableWidgetItem(at))
-                self.tw_process.setItem(row_count, 2, QTableWidgetItem(bt))
-
-                # 프로세스의 색상 설정
-                color = QColor(random.randint(0, 255), random.randint(
-                    0, 255), random.randint(0, 255))
-                
-                # 프로세스 추가
-                self.scheduler.add_process(pid, at, bt, color)
-
-                # 배경색 설정
-                item = self.tw_process.item(row_count, 0)
-                item.setBackground(color)
+                self.createProcessFunction(pid, at, bt)
 
     # 랜덤 프로세스 추가
+    # model : 3.5 = 1, 4.0 = 2, complex : high = 9, mid = 5, low = 1
     def RandomAddProcessFunction(self, is_DRR = False):
         if is_DRR:
-            # model : 3.5 = 1, 4.0 = 2, complex : high = 9, mid = 5, low = 1
-            num = random.randint(3, 6)
-            print(num)
-            # self.gpt_complex 
-            # self.gpt_model
-            pass
+            i = self.scheduler.get_processes_length() + 1
+            # print(f"i = {i}, length = {self.scheduler.get_processes_length()}")
+            for _ in range(3):
+                pid = i
+                # print(pid)
+                at = random.randint(0, 15)
+                complexity = random.randint(self.gpt_complex, self.gpt_complex + 3)
+                bt = complexity * self.gpt_model
+                self.createProcessFunction(pid, at, bt)
+                i += 1
+
+    def createProcessFunction(self, pid, at, bt):
+        print(f"pid : {pid} : {type(pid)}, at = {at} : {type(at)}, bt = {bt} : {type(bt)}")
+        row_count = self.tw_process.rowCount()
+        self.tw_process.insertRow(row_count)
+        self.tw_process.setItem(row_count, 0, QTableWidgetItem(f'P{pid:02}'))
+        self.tw_process.setItem(row_count, 1, QTableWidgetItem(f'{at:02}'))
+        self.tw_process.setItem(row_count, 2, QTableWidgetItem(f'{bt:02}'))
+
+        # 가장 밑으로 자동 스크롤
+        self.tw_process.scrollToBottom()
+
+        # 프로세스의 색상 설정
+        color = QColor(random.randint(0, 255), random.randint(
+            0, 255), random.randint(0, 255))
+        
+        # 프로세스 추가
+        self.scheduler.add_process(pid, at, bt, color)
+
+        # 배경색 설정
+        item = self.tw_process.item(row_count, 0)
+        item.setBackground(color)
 
     # del키로 프로세스 삭제
     def keyPressEvent(self, event):
@@ -209,7 +224,7 @@ class OS_Scheduler(QMainWindow, form_class):
             process_id_item = self.tw_process.item(
                 row, 0)  # process_id가 있는 열의 아이템 가져오기
             if process_id_item is not None:
-                process_id = process_id_item.text()
+                process_id = int(process_id_item.text()[1:3])
                 self.scheduler.remove_process(process_id)
             self.tw_process.removeRow(row)
         if len(selected_rows) == 0:
@@ -235,6 +250,8 @@ class OS_Scheduler(QMainWindow, form_class):
             if self.gb_complex.isEnabled():  # 처음에는 gb_complex 비활성화
                 self.gb_complex.setEnabled(False)
                 self.gb_complex.setStyleSheet("color: lightgray")
+            if not self.gb_add.isEnabled(): # gb_add 비활성화 시 다시 활성화
+                self.gb_add.setEnabled(True)
 
             self.cb_algorithm.move(100, 60)
             if index != 0:
@@ -247,6 +264,7 @@ class OS_Scheduler(QMainWindow, form_class):
                 if index == 6:  # TRR
                     self.gb_model.setEnabled(True)
                     self.gb_complex.setEnabled(True)
+                    self.gb_add.setEnabled(False) # 랜덤으로 프로세스를 추가시키기 위해 비활성화
                     self.gb_model.setStyleSheet("color: black")
                     self.gb_complex.setStyleSheet("color: black")
         else:  # Core 선택 ComboBox
@@ -330,17 +348,15 @@ class OS_Scheduler(QMainWindow, form_class):
 
             if reply == QMessageBox.Yes:
                 self.RandomAddProcessFunction(True)
-                pass
-            else:
-                for tup in self.gpt_selected:
-                    if tup[1] <= 2:
-                        tup[0].setIcon(QIcon('logo/g_gpt-icon.png'))
-                    else:
-                        tup[0].setIcon(QIcon('logo/g_complex.png'))
-                    tup[0].setChecked(False)
-                    print(tup[0].objectName(),"이 해제되었습니다.")
-                    self.gpt_model = self.gpt_complex = -1
-                self.gpt_selected.clear()
+            for tup in self.gpt_selected:
+                if tup[1] <= 2:
+                    tup[0].setIcon(QIcon('logo/g_gpt-icon.png'))
+                else:
+                    tup[0].setIcon(QIcon('logo/g_complex.png'))
+                tup[0].setChecked(False)
+                print(tup[0].objectName(),"이 해제되었습니다.")
+                self.gpt_model = self.gpt_complex = -1
+            self.gpt_selected.clear()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
