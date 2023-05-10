@@ -123,6 +123,11 @@ class OS_Scheduler(QMainWindow, form_class):
         # 메뉴 기능 연결
         self.a_exit.triggered.connect(QApplication.exit)
 
+    # 프로세스 이름 최신화    
+    def updateProcessNameFunction(self):
+        self.addProcessName = self.scheduler.get_processes_length() + 1
+        self.lb_add_process.setText(f"P{self.addProcessName:02}")
+
     # 프로세스 추가
     def processAddFunction(self, flag):
         if flag == 1:  # Name up
@@ -172,6 +177,7 @@ class OS_Scheduler(QMainWindow, form_class):
                 QMessageBox.warning(self, "추가 실패", "Burst Time은 0일 수 없습니다.")
             else:
                 self.createProcessFunction(pid, at, bt)
+                self.updateProcessNameFunction()
 
     # 랜덤 프로세스 추가
     # model : 3.5 = 1, 4.0 = 2, complex : high = 9, mid = 5, low = 1
@@ -196,6 +202,7 @@ class OS_Scheduler(QMainWindow, form_class):
                 bt = random.randint(1, 20)
                 self.createProcessFunction(pid, at, bt)
                 i += 1
+        self.updateProcessNameFunction()
 
     def createProcessFunction(self, pid, at, bt):
         print(f"pid : {pid} : {type(pid)}, at = {at} : {type(at)}, bt = {bt} : {type(bt)}")
@@ -237,6 +244,8 @@ class OS_Scheduler(QMainWindow, form_class):
                 process_id = int(process_id_item.text()[1:3])
                 self.scheduler.remove_process(process_id)
             self.tw_process.removeRow(row)
+            self.updateProcessNameFunction()
+            
         if len(selected_rows) == 0:
             QMessageBox.warning(self, '삭제 실패', f'선택된 행이 없습니다.')
         self.pb_remove.setVisible(False)
