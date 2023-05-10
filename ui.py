@@ -176,15 +176,23 @@ class OS_Scheduler(QMainWindow, form_class):
                 # 프로세스의 색상 설정
                 color = QColor(random.randint(0, 255), random.randint(
                     0, 255), random.randint(0, 255))
+                
+                # 프로세스 추가
                 self.scheduler.add_process(pid, at, bt, color)
 
                 # 배경색 설정
                 item = self.tw_process.item(row_count, 0)
                 item.setBackground(color)
 
-    # DRR 알고리즘에서의 프로세스 추가
-    def GPTAddProcessFunction():
-        pass
+    # 랜덤 프로세스 추가
+    def RandomAddProcessFunction(self, is_DRR = False):
+        if is_DRR:
+            # model : 3.5 = 1, 4.0 = 2, complex : high = 9, mid = 5, low = 1
+            num = random.randint(3, 6)
+            print(num)
+            # self.gpt_complex 
+            # self.gpt_model
+            pass
 
     # del키로 프로세스 삭제
     def keyPressEvent(self, event):
@@ -321,6 +329,7 @@ class OS_Scheduler(QMainWindow, form_class):
             
 
             if reply == QMessageBox.Yes:
+                self.RandomAddProcessFunction(True)
                 pass
             else:
                 for tup in self.gpt_selected:
