@@ -52,7 +52,7 @@ class OS_Scheduler(QMainWindow, form_class):
         # 코어 개수 설정
         self.core = [0] * 4
         # 추가하는 프로세서 이름, AT, BT
-        self.addProcessName = 0
+        self.addProcessName = 1
         self.addArrivalTime = 0
         self.addBurstTime = 0
 
@@ -69,12 +69,17 @@ class OS_Scheduler(QMainWindow, form_class):
         self.pb_model1.setCheckable(True)
         self.pb_model2.setCheckable(True)
 
+        self.pb_high.setCheckable(True)
+        self.pb_mid.setCheckable(True)
+        self.pb_low.setCheckable(True)
+
         self.gb_Timeq.setVisible(False)
         self.pb_remove.setVisible(False)
 
-        # 프로세스 column 너비 변경 불가능
+        # column 너비 변경 불가능
         self.tw_process.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
-
+        self.tw_result.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
+        
         # 알고리즘 선택 기능 연결
         # cb => algorithm : 1, core 0~3 : 2~5
         self.cb_algorithm.currentIndexChanged.connect(
@@ -87,6 +92,10 @@ class OS_Scheduler(QMainWindow, form_class):
         # GPT 모델 선택 기능 연결
         self.pb_model1.clicked.connect(lambda: self.GPTSelectFunction(1))
         self.pb_model2.clicked.connect(lambda: self.GPTSelectFunction(2))
+
+        self.pb_high.clicked.connect(lambda: self.GPTSelectFunction(3))
+        self.pb_mid.clicked.connect(lambda: self.GPTSelectFunction(4))
+        self.pb_low.clicked.connect(lambda: self.GPTSelectFunction(5))
 
         # 프로세스 추가, 삭제 기능 연결
         for i in range(3):
@@ -111,7 +120,7 @@ class OS_Scheduler(QMainWindow, form_class):
             self.addProcessName += 1
             self.lb_add_process.setText(f"P{self.addProcessName:02}")
         elif flag == 2:  # Name down
-            if self.addProcessName > 0:
+            if self.addProcessName > 1:
                 self.addProcessName -= 1
             self.lb_add_process.setText(f"P{self.addProcessName:02}")
         elif flag == 3:  # AT up
@@ -206,6 +215,10 @@ class OS_Scheduler(QMainWindow, form_class):
             if self.gb_model.isEnabled():  # 처음에는 gb_model 비활성화
                 self.gb_model.setEnabled(False)
                 self.gb_model.setStyleSheet("color: lightgray")
+            if self.gb_complex.isEnabled():  # 처음에는 gb_complex 비활성화
+                self.gb_complex.setEnabled(False)
+                self.gb_complex.setStyleSheet("color: lightgray")
+
             self.cb_algorithm.move(100, 60)
             if index != 0:
                 text = self.cb_algorithm.currentText()
@@ -216,7 +229,9 @@ class OS_Scheduler(QMainWindow, form_class):
                     self.cb_algorithm.move(10, 60)
                 if index == 6:  # TRR
                     self.gb_model.setEnabled(True)
+                    self.gb_complex.setEnabled(True)
                     self.gb_model.setStyleSheet("color: black")
+                    self.gb_complex.setStyleSheet("color: black")
         else:  # Core 선택 ComboBox
             if index == 0:  # Off
                 self.core[flag - 2] = 0
@@ -231,13 +246,31 @@ class OS_Scheduler(QMainWindow, form_class):
     def GPTSelectFunction(self, flag):
         pushbutton = self.sender()  # 이벤트를 발생시킨 버튼 객체 가져오기
         if pushbutton.isChecked():  # 버튼을 누를 때
-            subject = getattr(self, 'pb_model2') if flag == 1 else getattr(
-                self, 'pb_model1')
-            subject.setIcon(QIcon('logo/g_gpt-icon.png'))
-            subject.setChecked(False)
-            pushbutton.setIcon(QIcon('logo/gpt-icon.png'))
+            if flag <= 2:
+                subject = getattr(self, 'pb_model2') if flag == 1 else getattr(
+                    self, 'pb_model1')
+                subject.setIcon(QIcon('logo/g_gpt-icon.png'))
+                subject.setChecked(False)
+                if flag == 1:
+                    pushbutton.setIcon(QIcon('logo/gpt-icon.png'))
+                else:
+                    pushbutton.setIcon(QIcon('logo/gpt4-icon.png'))
+            else:
+                buttons = [getattr(self, 'pb_high'), getattr(self, 'pb_mid'), getattr(self, 'pb_low')]
+                for i, button in enumerate(buttons):
+                    if i + 3 == flag:
+                        button.setIcon(QIcon('logo/complex.png'))
+                        button.setChecked(True)
+                    else:
+                        button.setIcon(QIcon('logo/g_complex.png'))
+                        button.setChecked(False)
+                        
         else:  # 버튼을 해제할 때
-            pushbutton.setIcon(QIcon('logo/g_gpt-icon.png'))
+            if flag <= 2:
+                pushbutton.setIcon(QIcon('logo/g_gpt-icon.png'))
+            else:
+                pushbutton.setIcon(QIcon('logo/g_complex.png'))
+            
 
 
 if __name__ == "__main__":

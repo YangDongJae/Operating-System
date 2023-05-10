@@ -376,7 +376,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>P00</string>
+                 <string>P01</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -763,7 +763,7 @@
                </item>
                <item>
                 <property name="text">
-                 <string>TRR(Transformed Round Robin)</string>
+                 <string>DRR(Dynamic Round Robin)</string>
                 </property>
                </item>
               </widget>
@@ -1316,7 +1316,7 @@
             <item>
              <widget class="QGroupBox" name="gb_complex">
               <property name="enabled">
-               <bool>true</bool>
+               <bool>false</bool>
               </property>
               <property name="font">
                <font>
@@ -1330,45 +1330,6 @@
               <property name="title">
                <string>Complex</string>
               </property>
-              <widget class="QGroupBox" name="gb_highc">
-               <property name="geometry">
-                <rect>
-                 <x>50</x>
-                 <y>30</y>
-                 <width>101</width>
-                 <height>111</height>
-                </rect>
-               </property>
-               <property name="title">
-                <string>High</string>
-               </property>
-               <widget class="QPushButton" name="pb_high">
-                <property name="geometry">
-                 <rect>
-                  <x>10</x>
-                  <y>20</y>
-                  <width>81</width>
-                  <height>81</height>
-                 </rect>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset>
-                  <normaloff>logo/g_complex.png</normaloff>logo/g_complex.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>81</width>
-                  <height>81</height>
-                 </size>
-                </property>
-               </widget>
-              </widget>
               <widget class="QGroupBox" name="gb_lowc">
                <property name="geometry">
                 <rect>
@@ -1390,6 +1351,9 @@
                   <height>81</height>
                  </rect>
                 </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
                 <property name="styleSheet">
                  <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
                 </property>
@@ -1408,7 +1372,7 @@
                 </property>
                </widget>
               </widget>
-              <widget class="QGroupBox" name="gb_midc">
+              <widget class="QGroupBox" name="gb_mid">
                <property name="geometry">
                 <rect>
                  <x>200</x>
@@ -1428,6 +1392,51 @@
                   <width>81</width>
                   <height>81</height>
                  </rect>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>logo/g_complex.png</normaloff>logo/g_complex.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>81</width>
+                  <height>81</height>
+                 </size>
+                </property>
+               </widget>
+              </widget>
+              <widget class="QGroupBox" name="gb_high">
+               <property name="geometry">
+                <rect>
+                 <x>50</x>
+                 <y>30</y>
+                 <width>101</width>
+                 <height>111</height>
+                </rect>
+               </property>
+               <property name="title">
+                <string>High</string>
+               </property>
+               <widget class="QPushButton" name="pb_high">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>81</width>
+                  <height>81</height>
+                 </rect>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
                 </property>
                 <property name="styleSheet">
                  <string notr="true">background-color: rgba(0, 0, 0, 0.0)</string>
