@@ -118,6 +118,7 @@ class OS_Scheduler(QMainWindow, form_class):
         self.tw_process.itemSelectionChanged.connect(
             lambda: self.rbVisibilityFunction())
         self.pb_remove.clicked.connect(lambda: self.processRemoveFunction())
+        self.pb_random.clicked.connect(lambda: self.RandomAddProcessFunction())
 
         # 메뉴 기능 연결
         self.a_exit.triggered.connect(QApplication.exit)
@@ -184,6 +185,15 @@ class OS_Scheduler(QMainWindow, form_class):
                 at = random.randint(0, 15)
                 complexity = random.randint(self.gpt_complex, self.gpt_complex + 3)
                 bt = complexity * self.gpt_model
+                self.createProcessFunction(pid, at, bt)
+                i += 1
+        else:
+            i = self.scheduler.get_processes_length() + 1
+            length = random.randint(3, 15) 
+            for _ in range(length):
+                pid = i
+                at = random.randint(0, 15)
+                bt = random.randint(1, 20)
                 self.createProcessFunction(pid, at, bt)
                 i += 1
 
