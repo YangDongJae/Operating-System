@@ -82,7 +82,7 @@ class RR(SchedulingAlgorithm):
                 self.completed_processes.append(processor.current_process)
                 processor.current_process = None
             elif processor.current_process.remaining_time > 0:
-                if (processor.current_process.burst_time - processor.current_process.remaining_time) % self.time_quantum == 0:
+                if (processor.current_process.count) % self.time_quantum == 0:
                     self.ready_queue.append(processor.current_process)
                     processor.current_process = None
         
@@ -221,7 +221,3 @@ def main():
     main_program.create_process()
     main_program.run_scheduler()
     main_program.print_result()
-
-
-if __name__ == "__main__":
-    main()
