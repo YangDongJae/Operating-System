@@ -102,7 +102,8 @@ class HRRN(SchedulingAlgorithm):
                 self.process_queue.remove(process)  
                 self.ready_queue.append(process)
            
-            
+            if self.ready_queue:
+                self.ready_queue=sorted(self.ready_queue, key=lambda process:((process.waiting_time+process.burst_time)/process.burst_time))            
                 
             #각 코어에 할당
             if not processor0.current_process and not processor0.core_type == None and self.ready_queue:                 #0번째 프로세서에 존재x, 레디큐에 존재
