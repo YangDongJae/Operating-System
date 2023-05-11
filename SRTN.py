@@ -162,7 +162,7 @@ class SRTN(SchedulingAlgorithm):
             
     def print_results(self):
         
-        print("Process ID  Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time")
+        print("Process ID | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time")
         for process in self.completed_processes:
             print(f"{process.pid} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time}")
         P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
