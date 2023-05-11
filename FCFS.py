@@ -1,13 +1,12 @@
 class Process:
-    def __init__(self, pid, arrival_time, burst_time, completed_time):
+    def __init__(self, pid, arrival_time, burst_time):
         self.pid = pid
         self.arrival_time = arrival_time
         self.burst_time = burst_time
         self.remaining_time = burst_time
-        self.completed_time = completed_time
         self.count = 0  #프로세스에서 돈 시간 카운트
-        self.waiting_time = 0
-        self.turnaround_time = 0
+
+
 
 
 class Processor:
@@ -60,6 +59,7 @@ class FCFS(SchedulingAlgorithm):
         self.processor1_queue = []
         self.processor2_queue = []
         self.processor3_queue = []
+        self.total_power_usage = []
                                             
     def add_process(self, process):         #프로세스 할당
         self.process_queue.append(process)  #프로세스 큐에 프로세스 추가 
@@ -78,6 +78,7 @@ class FCFS(SchedulingAlgorithm):
                 processor.current_process.waiting_time = (current_time - processor.current_process.arrival_time - processor.current_process.count + 1)
                 processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
                 processor.current_process.completed_time = current_time + 1
+                processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
                 self.completed_processes.append(processor.current_process)
                 processor.current_process = None
                      
@@ -144,25 +145,47 @@ class FCFS(SchedulingAlgorithm):
             processor2.update_power_status(processor2)
             processor3.update_power_status(processor3)
 
+            if processor0.current_process:
+                self.processor0_queue.append((processor0.current_process.pid,processor0.power_usage))
+            else:
+                self.processor0_queue.append((0,processor0.power_usage))
+
+            if processor1.current_process:
+                self.processor1_queue.append((processor1.current_process.pid,processor1.power_usage))
+            else:
+                self.processor1_queue.append((0,processor1.power_usage))
+
+            if processor2.current_process:
+                self.processor2_queue.append((processor2.current_process.pid,processor2.power_usage))
+            else:
+                self.processor2_queue.append((0,processor2.power_usage))
+
+            if processor3.current_process:
+                self.processor3_queue.append((processor3.current_process.pid, processor3.power_usage))
+            else:
+                self.processor3_queue.append((0, processor3.power_usage))
+
             #프로세스 처리 매 초마다
             self.update_current_process(processor0, current_time)
             self.update_current_process(processor1, current_time)
             self.update_current_process(processor2, current_time)
             self.update_current_process(processor3, current_time)
 
+            self.total_power_usage.append(processor0.power_usage + processor1.power_usage + processor2.power_usage + processor3.power_usage)
+
             #한 주기 긑
             current_time += 1
             
     def print_results(self):
         
-        print("Process ID | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time")
+        print("Process ID | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time | NTT ")
         for process in self.completed_processes:
-            print(f"{process.pid} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time}")
+            print(f"{process.pid} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.NTT} ")
         P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
         E_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "E"])
         print("P코어 총 전력 사용량:",P_cores_power_usage,"W")
         print("E코어 총 전력 사용량:",E_cores_power_usage,"W")
-        print("총 전력 사용량:",round(P_cores_power_usage+E_cores_power_usage, 1),"W")
+        print("총 전력 사용량:",self.total_power_usage ,"W")
         print("프로세서 0에서 작업한 프로세스:", self.processor0_queue)
         print("프로세서 1에서 작업한 프로세스:", self.processor1_queue)
         print("프로세서 2에서 작업한 프로세스:", self.processor2_queue)
@@ -182,7 +205,7 @@ class Main:
             burst_time = i[2]
             completed_time = 0
 
-            process = Process(pid, arrival_time, burst_time, completed_time)
+            process = Process(pid, arrival_time, burst_time)
             self.processes.append(process)
 
     def run_scheduler(self):
@@ -200,16 +223,7 @@ def main():
                              [3, 7, 3],
                              [4, 16, 16],
                              [5, 8 ,18],
-                             [6, 2, 8],
-                             [7, 15, 6],
-                             [8, 7, 2],
-                             [9, 3, 1],
-                             [10, 0, 14],
-                             [11, 1, 12],
-                             [12, 13, 9],
-                             [13, 5, 24],
-                             [14, 4, 11],
-                             [15, 11, 10]]
+                             [6, 2, 8]]
 
     processor_select_signal = [1, 1, 1, 1]
 
