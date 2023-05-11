@@ -12,6 +12,7 @@ class Process:
         self.complexity = complexity
         self.time_quantum = time_quantum
 
+
 class Processor:
     def __init__(self, processor_id, core_type: str):
         self.processor_id = processor_id
@@ -31,7 +32,8 @@ class Processor:
         else:
             if processor.power_on:
                 processor.power_on = False     
-                
+
+              
 class SchedulingAlgorithm:
     def __init__(self, processor_select_signal):
         self.processors = []
@@ -48,6 +50,7 @@ class SchedulingAlgorithm:
     def schedule(self):
         raise NotImplementedError("schedule method must be implemented by a subclass")
 
+
 class DRR(SchedulingAlgorithm):
     def __init__(self, processor_select_signal):
         super().__init__(processor_select_signal)
@@ -56,10 +59,11 @@ class DRR(SchedulingAlgorithm):
         self.completed_processes = []
         self.outed_processes = []
         self.time_quantum_table = {
-            (1, 10):  2,
-            (11, 20): 4,
-            (21, 30): 6,
-            (31, float('inf')): 8
+            (1, 5):  1,
+            (6, 10): 2,
+            (11, 15): 3,
+            (16, 20): 4,
+            (21, float('inf')): 5
         }
 
         self.processor0_queue = []
@@ -78,7 +82,7 @@ class DRR(SchedulingAlgorithm):
             elif processor.core_type == "E":
                 if ready_queue[0].remaining_time == 1 or ready_queue[0].complexity <= 4:
                     processor.current_process = ready_queue.pop(0)
-                elif all([p.current_process for p in processor_list]):
+                elif all([p.current_process for p in processor_list if p.core_type == "P"]):
                     processor.current_process = ready_queue.pop(0)                
                 
     def handle_outed_process(self, processor, scheduler, current_time):
@@ -197,6 +201,7 @@ class DRR(SchedulingAlgorithm):
         print("프로세서 2에서 작업한 프로세스:", self.processor2_queue)
         print("프로세서 3에서 작업한 프로세스:", self.processor3_queue)
 
+
 class Main:
     def __init__(self, process_select_signal, processor_select_signal):
         self.processes = []
@@ -225,24 +230,14 @@ class Main:
 
     def print_result(self):
         self.drr_algorithm.print_results()
-            
+
 
 def main():
-    process_select_signal = [[1, 1, 6, "GPT 3.5", 6],
-                             [2, 12, 20, "GPT 4", 10],
-                             [3, 7, 3, "GPT 3.5", 3],
-                             [4, 16, 16, "GPT 4", 8],
-                             [5, 8 ,18, "GPT 4", 9],
-                             [6, 2, 8, "GPT 3.5", 8],
-                             [7, 15, 6, "GPT 4", 3],
-                             [8, 7, 2, "GPT 3.5", 2],
-                             [9, 3, 1, "GPT 3.5", 1],
-                             [10, 0, 14, "GPT 4", 7],
-                             [11, 1, 12, "GPT 4", 6],
-                             [12, 13, 9, "GPT 3.5", 9],
-                             [13, 5, 24, "GPT 4", 12],
-                             [14, 4, 11, "GPT 3.5", 11],
-                             [15, 11, 10, "GPT 4", 5]]
+    process_select_signal = [[1, 0, 5, "GPT 3.5", 5],
+                             [2, 0, 10, "GPT 4", 5],
+                             [3, 0, 10, "GPT 4", 5],
+                             [4, 0, 5, "GPT 3.5", 5],
+                             [5, 0 , 10, "GPT 4", 5]]
 
     processor_select_signal = [1, 1, 1, 2]
 
