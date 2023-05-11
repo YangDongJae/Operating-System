@@ -242,7 +242,10 @@ class OS_Scheduler(QMainWindow, form_class):
             process_id_item = self.tw_process.item(
                 row, 0)  # process_id가 있는 열의 아이템 가져오기
             if process_id_item is not None:
-                process_id = int(process_id_item.text()[1:3])
+                text = process_id_item.text()
+                process_id = int(text[1:3])
+                if len(process_id_item.text()) == 4:
+                    process_id = int(text[1:4])
                 self.scheduler.remove_process(process_id)
             self.tw_process.removeRow(row)
             self.updateProcessNameFunction()
@@ -272,6 +275,8 @@ class OS_Scheduler(QMainWindow, form_class):
                 self.gb_complex.setStyleSheet("color: lightgray")
             if not self.gb_add.isEnabled(): # gb_add 비활성화 시 다시 활성화
                 self.gb_add.setEnabled(True)
+            if not self.pb_random.isEnabled(): # gb_add 비활성화 시 다시 활성화
+                self.pb_random.setEnabled(True)
 
             self.cb_algorithm.move(100, 60)
             if index != 0:
@@ -285,6 +290,7 @@ class OS_Scheduler(QMainWindow, form_class):
                     self.gb_model.setEnabled(True)
                     self.gb_complex.setEnabled(True)
                     self.gb_add.setEnabled(False) # 랜덤으로 프로세스를 추가시키기 위해 비활성화
+                    self.pb_random.setEnabled(False)
                     self.gb_model.setStyleSheet("color: black")
                     self.gb_complex.setStyleSheet("color: black")
         else:  # Core 선택 ComboBox
