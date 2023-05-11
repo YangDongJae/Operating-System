@@ -8,6 +8,7 @@ class Process:
         self.count = 0
         self.waiting_time = 0
         self.turnaround_time = 0
+        self.NTT = 0
         self.gpt_model = gpt_model
         self.complexity = complexity
         self.time_quantum = time_quantum
@@ -30,8 +31,10 @@ class Processor:
                 elif processor.core_type == "E":
                     processor.power_usage += 0.1
         else:
-            if processor.power_on:
+            if processor.power_on == True:
                 processor.power_on = False     
+
+
 
               
 class SchedulingAlgorithm:
@@ -70,6 +73,7 @@ class DRR(SchedulingAlgorithm):
         self.processor1_queue = []
         self.processor2_queue = []
         self.processor3_queue = []
+        self.total_power_usage = []
 
     def add_process(self, process):
         self.process_queue.append(process)
@@ -89,6 +93,7 @@ class DRR(SchedulingAlgorithm):
         processor.current_process.waiting_time = (current_time - processor.current_process.arrival_time - processor.current_process.count + 1)
         processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
         processor.current_process.completed_time = current_time + 1
+        processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
         scheduler.outed_processes.append(processor.current_process)
         processor.current_process = None
 
@@ -96,6 +101,7 @@ class DRR(SchedulingAlgorithm):
         processor.current_process.waiting_time = (current_time - processor.current_process.arrival_time - processor.current_process.count + 1)
         processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
         processor.current_process.completed_time = current_time + 1
+        processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
         scheduler.completed_processes.append(processor.current_process)
         processor.current_process = None
 
@@ -119,11 +125,14 @@ class DRR(SchedulingAlgorithm):
             elif processor.current_process.remaining_time <= 0:
                 self.handle_completed_process(processor, scheduler, current_time)
             elif processor.current_process.remaining_time > 0:
-                if (processor.current_process.burst_time - processor.current_process.remaining_time) % processor.current_process.time_quantum == 0:
-                    self.handle_preempted_process(processor, scheduler)
+                if processor.core_type == "E":
+                    if (processor.current_process.burst_time - processor.current_process.remaining_time) % processor.current_process.time_quantum == 0:
+                        self.handle_preempted_process(processor, scheduler)
+                elif processor.core_type == "P":
+                    if (processor.current_process.count) % processor.current_process.time_quantum == 0:
+                        self.handle_preempted_process(processor, scheduler)
                     
-                         
-
+                        
     def schedule(self):
         current_time = 0
         processor0 = self.processors[0]
@@ -149,32 +158,32 @@ class DRR(SchedulingAlgorithm):
             self.assign_process_to_processor(processor3, self.processors, self.ready_queue)
 
             if processor0.current_process:
-                self.processor0_queue.append(processor0.current_process.pid)
+                self.processor0_queue.append((processor0.current_process.pid,processor0.power_usage))
             else:
-                self.processor0_queue.append(0)
+                self.processor0_queue.append((0,processor0.power_usage))
 
             if processor1.current_process:
-                self.processor1_queue.append(processor1.current_process.pid)
+                self.processor1_queue.append((processor1.current_process.pid,processor1.power_usage))
             else:
-                self.processor1_queue.append(0)
+                self.processor1_queue.append((0,processor1.power_usage))
 
             if processor2.current_process:
-                self.processor2_queue.append(processor2.current_process.pid)
+                self.processor2_queue.append((processor2.current_process.pid,processor2.power_usage))
             else:
-                self.processor2_queue.append(0)
+                self.processor2_queue.append((0,processor2.power_usage))
 
             if processor3.current_process:
-                self.processor3_queue.append(processor3.current_process.pid)
+                self.processor3_queue.append((processor3.current_process.pid, processor3.power_usage))
             else:
-                self.processor3_queue.append(0)
-
+                self.processor3_queue.append((0, processor3.power_usage))  
 
             processor0.update_power_status(processor0)
             processor1.update_power_status(processor1)
             processor2.update_power_status(processor2)
             processor3.update_power_status(processor3)
+          
 
-            
+            self.total_power_usage.append(processor0.power_usage + processor1.power_usage + processor2.power_usage + processor3.power_usage)
 
             self.update_current_process(processor0, self, current_time)
             self.update_current_process(processor1, self, current_time)
@@ -185,17 +194,17 @@ class DRR(SchedulingAlgorithm):
             current_time += 1
 
     def print_results(self):
-        print("Process ID | GPT Model | Complexity | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time | Working Time")
+        print("Process ID | GPT Model | Complexity | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time | NTT | Working Time")
         for process in self.completed_processes:
-            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} |  {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.count}")
+            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} |  {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.NTT} | {process.count}")
         print("<아웃된 프로세스>")
         for process in self.outed_processes:
-            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.count}")
+            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.NTT} | {process.count}")
         P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
         E_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "E"])
         print("P코어 총 전력 사용량:",round(P_cores_power_usage, 1),"W")
         print("E코어 총 전력 사용량:",round(E_cores_power_usage, 1),"W")
-        print("총 전력 사용량:",round(P_cores_power_usage+E_cores_power_usage, 1),"W")
+        print("총 전력 사용량:",self.total_power_usage,"W")
         print("프로세서 0에서 작업한 프로세스:", self.processor0_queue)
         print("프로세서 1에서 작업한 프로세스:", self.processor1_queue)
         print("프로세서 2에서 작업한 프로세스:", self.processor2_queue)
@@ -233,10 +242,10 @@ class Main:
 
 
 def main():
-    process_select_signal = [[1, 0, 5, "GPT 3.5", 5],
+    process_select_signal = [[1, 0, 10, "GPT 3.5", 5],
                              [2, 0, 10, "GPT 4", 5],
                              [3, 0, 10, "GPT 4", 5],
-                             [4, 0, 5, "GPT 3.5", 5],
+                             [4, 0, 10, "GPT 3.5", 5],
                              [5, 0 , 10, "GPT 4", 5]]
 
     processor_select_signal = [1, 1, 1, 2]
