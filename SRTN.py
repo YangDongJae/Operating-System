@@ -83,8 +83,8 @@ class SRTN(SchedulingAlgorithm):
                 self.completed_processes.append(processor.current_process)
                 processor.current_process = None
             elif processor.current_process.remaining_time > 0 and self.ready_queue: #시간 남아있고 레디큐에 존재하면
-                    if processor.current_process.remaining_time > self.ready_queue[0].remaining_time:   #레디큐 0번째의 RT가 0프로세서의 프로세스의 RT보다 작으면
-                        self.ready_queue.append(processor.current_process)                               #둘이 교환
+                    if processor.current_process.remaining_time > self.ready_queue[0].remaining_time:   #수정 부분
+                        self.ready_queue.append(processor.current_process)                              
                         processor.current_process = None
                         self.ready_queue=sorted(self.ready_queue, key=lambda process:process.remaining_time)
                 
