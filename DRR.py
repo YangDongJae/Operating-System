@@ -125,12 +125,8 @@ class DRR(SchedulingAlgorithm):
             elif processor.current_process.remaining_time <= 0:
                 self.handle_completed_process(processor, scheduler, current_time)
             elif processor.current_process.remaining_time > 0:
-                if processor.core_type == "E":
-                    if (processor.current_process.burst_time - processor.current_process.remaining_time) % processor.current_process.time_quantum == 0:
-                        self.handle_preempted_process(processor, scheduler)
-                elif processor.core_type == "P":
-                    if (processor.current_process.count) % processor.current_process.time_quantum == 0:
-                        self.handle_preempted_process(processor, scheduler)
+                if (processor.current_process.count) % processor.current_process.time_quantum == 0:
+                    self.handle_preempted_process(processor, scheduler)
                     
                         
     def schedule(self):
@@ -242,10 +238,10 @@ class Main:
 
 
 def main():
-    process_select_signal = [[1, 0, 10, "GPT 3.5", 5],
+    process_select_signal = [[1, 0, 10, "GPT 4", 5],
                              [2, 0, 10, "GPT 4", 5],
                              [3, 0, 10, "GPT 4", 5],
-                             [4, 0, 10, "GPT 3.5", 5],
+                             [4, 0, 10, "GPT 4", 5],
                              [5, 0 , 10, "GPT 4", 5]]
 
     processor_select_signal = [1, 1, 1, 2]
