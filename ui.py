@@ -5,6 +5,8 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import QEvent
 from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QTimer, QTime
+
 from PyQt5 import uic
 
 form_class = uic.loadUiType("os.ui")[0]
@@ -52,14 +54,19 @@ class ProcessScheduler:
 class OS_Scheduler(QMainWindow, form_class):
     def __init__(self):
         super().__init__()
-        # 코어 개수 설정
+        # 코어 개수
         self.core = [0] * 4
+        # 알고리즘
+        self.algorithm = -1
+        # time quentum
+        self.time_quentum = -1
+
         # 추가하는 프로세서 이름, AT, BT
         self.addProcessName = 1
         self.addArrivalTime = 0
         self.addBurstTime = 0
 
-        self.existing_colors = []
+        # self.existing_colors = []
 
         # selected = 클릭한 model과 complex, gpt_model, gpt_complex = 최종 결정한 결과
         # model : 3.5 = 1, 4.0 = 2, complex : high = 9, mid = 5, low = 1
@@ -90,6 +97,9 @@ class OS_Scheduler(QMainWindow, form_class):
         self.tw_process.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.tw_result.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
         
+        # gantt : 모든 열의 높이가 같도록 변경, 자동 스크롤 설정
+        self.tw_gantt.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
         # 알고리즘 선택 기능 연결
         # cb => algorithm : 1, core 0~3 : 2~5
         self.cb_algorithm.currentIndexChanged.connect(
@@ -119,11 +129,88 @@ class OS_Scheduler(QMainWindow, form_class):
         self.pb_savep.clicked.connect(lambda: self.processAddFunction(8))
         self.tw_process.itemSelectionChanged.connect(
             lambda: self.rbVisibilityFunction())
-        self.pb_remove.clicked.connect(lambda: self.processRemoveFunction())
-        self.pb_random.clicked.connect(lambda: self.RandomAddProcessFunction())
+        self.pb_remove.clicked.connect(self.processRemoveFunction)
+        self.pb_random.clicked.connect(self.RandomAddProcessFunction)
 
         # 메뉴 기능 연결
         self.a_exit.triggered.connect(QApplication.exit)
+
+        # 실행 버튼 기능 연결
+        self.pb_start.clicked.connect(self.startFunction)
+
+        # Time Quentum 기능 연결 : 변수 할당
+        self.sb_Timeq.valueChanged.connect(lambda value: setattr(self, 'time_quentum', value))
+
+    def UpdateCurrentTimeFunction(self):
+        elapsed_time = self.start_time.elapsed() / 1000  # ms -> s
+        self.lb_time.setText(f"{elapsed_time:.3f}")
+
+    def startFunction(self):
+        if len(self.scheduler.processes) > 0 and (self.core.count(1) > 0 or self.core.count(2) > 0):
+            self.sendInfoToAlgorithmFunction()
+            self.timer = QTimer()
+            self.start_time = QTime.currentTime()
+            self.timer.timeout.connect(self.ganttChartFunction)
+            self.timer.start(1000)  # 1초에 한 번씩 호출
+            
+            self.timer_l = QTimer()
+            self.timer_l.timeout.connect(self.UpdateCurrentTimeFunction)
+            self.timer_l.start(10)  # 10밀리초마다 호출
+            self.lb_sec.setText("초")
+        elif len(self.scheduler.processes) == 0:
+            QMessageBox.warning(self, '시작 실패', '프로세스가 입력되지 않았습니다.')
+            print("프로세스가 입력되지 않았습니다.")
+        else:
+            QMessageBox.warning(self, '시작 실패', 'Core가 선택되지 않았습니다.')
+            print("Core가 선택되지 않았습니다.")
+        
+    def sendInfoToAlgorithmFunction(self):
+        send_Info = []
+        process_Info = []
+        core_Info = []
+        send_to = self.algorithm
+
+        for process in self.scheduler.processes:
+            process_Info.append((process.process_id,process.arrival_time,process.burst_time))
+        send_Info.append(process_Info)
+        for core in self.core:
+            core_Info.append(core)
+        send_Info.append(core_Info)
+        send_Info.append(self.algorithm)
+        
+        # 1: FCFS, 2: RR, 3: SPN, 4: SRTN, 5: HRRN, 6: DRR
+        if send_to == 1:
+            pass
+        elif send_to == 2:
+            send_Info.append(self.time_quentum)
+        elif send_to == 3:
+            pass
+        elif send_to == 4:
+            pass
+        elif send_to == 5:
+            pass
+        elif send_to == 6:
+            pass
+        else:
+            pass
+
+        print(send_Info)
+
+    def ganttChartFunction(self):
+        # 새로운 열 추가하기
+        elapsed_time = int(round(self.start_time.elapsed() / 1000, 0))  # ms -> s
+
+        self.tw_gantt.setColumnCount(self.tw_gantt.columnCount() + 1)
+
+        # last_column = self.tw_gantt.columnCount() - 1
+        # last_item = self.tw_gantt.item(0, last_column)
+        # self.tw_gantt.scrollToItem(last_item)
+
+        # 새로운 열의 헤더 설정하기
+        column = self.tw_gantt.columnCount() - 1
+        header = QTableWidgetItem(f"{elapsed_time}")
+        self.tw_gantt.setHorizontalHeaderItem(column, header)
+
 
     # 프로세스 이름 최신화    
     def updateProcessNameFunction(self):
@@ -167,13 +254,10 @@ class OS_Scheduler(QMainWindow, form_class):
             # 이미 동일한 pid가 processes에 있는지 확인
             pid_exists = any(process.process_id ==
                              pid for process in self.scheduler.processes)
-            # # arrival_time이 동일한 프로세스가 있는지 확인
-            # same_at_exists = any(process.arrival_time == at for process in self.scheduler.processes)
 
             if pid_exists:
                 QMessageBox.warning(self, '추가 실패', f'프로세스 {pid}는 이미 존재합니다.')
-            # elif same_at_exists:
-            #     QMessageBox.warning(self, '추가 실패', f'도착 시간 {at}와 동일한 도착 시간을 가진 프로세스가 이미 존재합니다.')
+            
             elif int(bt) <= 0:
                 QMessageBox.warning(self, "추가 실패", "Burst Time은 0일 수 없습니다.")
             else:
@@ -185,10 +269,8 @@ class OS_Scheduler(QMainWindow, form_class):
     def RandomAddProcessFunction(self, is_DRR = False):
         if is_DRR:
             i = self.scheduler.get_processes_length() + 1
-            # print(f"i = {i}, length = {self.scheduler.get_processes_length()}")
             for _ in range(3):
                 pid = i
-                # print(pid)
                 at = random.randint(0, 15)
                 complexity = random.randint(self.gpt_complex, self.gpt_complex + 3)
                 bt = complexity * self.gpt_model
@@ -206,7 +288,6 @@ class OS_Scheduler(QMainWindow, form_class):
         self.updateProcessNameFunction()
 
     def createProcessFunction(self, pid, at, bt):
-        print(f"pid : {pid} : {type(pid)}, at = {at} : {type(at)}, bt = {bt} : {type(bt)}")
         row_count = self.tw_process.rowCount()
         self.tw_process.insertRow(row_count)
         self.tw_process.setItem(row_count, 0, QTableWidgetItem(f'P{pid:02}'))
@@ -251,7 +332,7 @@ class OS_Scheduler(QMainWindow, form_class):
             self.updateProcessNameFunction()
 
         if len(selected_rows) == 0:
-            QMessageBox.warning(self, '삭제 실패', f'선택된 행이 없습니다.')
+            QMessageBox.warning(self, '삭제 실패', f'선택된 행이 없거나 프로세스를 선택하지 않았습니다.')
         self.pb_remove.setVisible(False)
 
     # 열 선택시에만 삭제 버튼 가시화
@@ -281,6 +362,7 @@ class OS_Scheduler(QMainWindow, form_class):
             self.cb_algorithm.move(100, 60)
             if index != 0:
                 text = self.cb_algorithm.currentText()
+                self.algorithm = index
                 QMessageBox.about(
                     self, '알고리즘 선택', f'{text} 알고리즘을 선택하셨습니다.')
                 if index == 2:  # RR
@@ -294,12 +376,28 @@ class OS_Scheduler(QMainWindow, form_class):
                     self.gb_model.setStyleSheet("color: black")
                     self.gb_complex.setStyleSheet("color: black")
         else:  # Core 선택 ComboBox
+            # flag 2, 3, 4, 5
+            # TODO : 리스트에 넣어놓고 정렬 후에, 매번 초기화, 갱신하는 게 좋을 것 같음
             if index == 0:  # Off
                 self.core[flag - 2] = 0
-            elif index == 1:  # P-Core
-                self.core[flag - 2] = 1
-            else:  # E-Core
-                self.core[flag - 2] = 2
+            else:
+                if index == 1:  # P-Core
+                    self.core[flag - 2] = 1
+                else:  # E-Core
+                    self.core[flag - 2] = 2
+
+            self.tw_gantt.clearContents()  # 테이블 위젯의 모든 셀 내용 삭제
+            self.tw_gantt.setRowCount(0)  # 테이블 위젯의 모든 행 삭제
+            gantt_core = []
+            for i, core in enumerate(self.core):
+                if not core == 0: core_type = "P" if core == 1 else "E"
+                if core: gantt_core.append((i, core_type))
+            print(gantt_core)
+            for i in range(len(gantt_core)):
+                row_count = self.tw_gantt.rowCount()
+                self.tw_gantt.insertRow(row_count)
+                self.tw_gantt.setItem(row_count, 0, QTableWidgetItem(f'Core {gantt_core[i][0]}({gantt_core[i][1]})'))
+
             self.lb_core.setText(
                 f"현재 코어: P-Core : {self.core.count(1)}개, E-Core : {self.core.count(2)}개")
 
@@ -371,7 +469,6 @@ class OS_Scheduler(QMainWindow, form_class):
                         name[1] = "Low"
             reply = QMessageBox.question(self, '프로세스 생성', f'선택한 GPT 모델({name[0]})과 복잡도({name[1]})를 이용해서 프로세스들을 생성하시겠습니까?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             
-
             if reply == QMessageBox.Yes:
                 self.RandomAddProcessFunction(True)
             for tup in self.gpt_selected:
