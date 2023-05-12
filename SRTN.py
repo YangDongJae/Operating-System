@@ -78,8 +78,9 @@ class SRTN(SchedulingAlgorithm):
             if processor.current_process.remaining_time <= 0:
                 processor.current_process.waiting_time = (current_time - processor.current_process.arrival_time - processor.current_process.count + 1)
                 processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
+                processor.current_process.completed_time = current_time + 1
                 processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
-                self.completed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time,processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT))
+                self.completed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time,processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT, processor.current_process.completed_time))
                 processor.current_process = None
             elif processor.current_process.remaining_time > 0 and self.ready_queue: #시간 남아있고 레디큐에 존재하면
                     if processor.current_process.remaining_time > self.ready_queue[0].remaining_time:   #수정 부분
