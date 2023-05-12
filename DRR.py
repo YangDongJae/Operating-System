@@ -91,7 +91,7 @@ class DRR(SchedulingAlgorithm):
         processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
         processor.current_process.completed_time = current_time + 1
         processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
-        scheduler.outed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time, processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT,processor.current_process.completed_time))
+        scheduler.outed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.count, processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT,processor.current_process.completed_time))
         processor.current_process = None
 
     def handle_completed_process(self, processor, scheduler, current_time):
@@ -99,15 +99,14 @@ class DRR(SchedulingAlgorithm):
         processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
         processor.current_process.completed_time = current_time + 1
         processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
-        scheduler.completed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time,  processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT,processor.current_process.completed_time))
+        scheduler.completed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.count, processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT,processor.current_process.completed_time))
         processor.current_process = None
 
     def handle_preempted_process(self, processor, scheduler):
         scheduler.ready_queue.append(processor.current_process)
         processor.current_process = None
                 
-                
-    def update_current_process(self,processor, scheduler, current_time):
+    def update_power_usage(self,processor):
         if processor.current_process:
             processor.current_process.count += 1
             if processor.core_type == "P":
@@ -116,7 +115,9 @@ class DRR(SchedulingAlgorithm):
             elif processor.core_type == "E":
                 processor.current_process.remaining_time -= 1
                 processor.power_usage += 1
-
+        
+    def update_current_process(self,processor, scheduler, current_time):
+        if processor.current_process:
             if processor.current_process.count >= 10:
                 self.handle_outed_process(processor, scheduler, current_time)
             elif processor.current_process.remaining_time <= 0:
@@ -160,6 +161,11 @@ class DRR(SchedulingAlgorithm):
             processor1.update_power_status(processor1)
             processor2.update_power_status(processor2)
             processor3.update_power_status(processor3)
+
+            processor0.update_power_usage(processor0)
+            processor1.update_power_usage(processor1)
+            processor2.update_power_usage(processor2)
+            processor3.update_power_usage(processor3)
          
             if processor0.current_process:
                 self.processor0_queue.append((processor0.current_process.pid,processor0.power_usage))
@@ -181,7 +187,7 @@ class DRR(SchedulingAlgorithm):
             else:
                 self.processor3_queue.append((0, processor3.power_usage))
 
-            self.total_power_usage.append(processor0.power_usage + processor1.power_usage + processor2.power_usage + processor3.power_usage)
+            self.total_power_usage.append(round(processor0.power_usage + processor1.power_usage + processor2.power_usage + processor3.power_usage,1))
 
             for i in self.ready_queue:
                 self.list.append(i.pid)
