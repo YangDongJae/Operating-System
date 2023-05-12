@@ -91,7 +91,7 @@ class DRR(SchedulingAlgorithm):
         processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
         processor.current_process.completed_time = current_time + 1
         processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
-        scheduler.outed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time, processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT))
+        scheduler.outed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time, processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT,processor.current_process.completed_time))
         processor.current_process = None
 
     def handle_completed_process(self, processor, scheduler, current_time):
@@ -99,7 +99,7 @@ class DRR(SchedulingAlgorithm):
         processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
         processor.current_process.completed_time = current_time + 1
         processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
-        scheduler.completed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time,  processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT))
+        scheduler.completed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time,  processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT,processor.current_process.completed_time))
         processor.current_process = None
 
     def handle_preempted_process(self, processor, scheduler):
