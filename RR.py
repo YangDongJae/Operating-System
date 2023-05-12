@@ -79,7 +79,7 @@ class RR(SchedulingAlgorithm):
                 processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
                 processor.current_process.completed_time = current_time + 1
                 processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
-                self.completed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time,processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT))
+                self.completed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time,processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT,processor.current_process.completed_time))
                 processor.current_process = None
             elif processor.current_process.remaining_time > 0:
                 if (processor.current_process.count) % self.time_quantum == 0:
@@ -125,24 +125,24 @@ class RR(SchedulingAlgorithm):
 
             #프로세서 큐 할당
             if processor0.current_process:
-                self.processor0_queue.append(processor0.current_process.pid)
+                self.processor0_queue.append((processor0.current_process.pid,processor0.power_usage))
             else:
-                self.processor0_queue.append(0)
+                self.processor0_queue.append((0,processor0.power_usage))
 
             if processor1.current_process:
-                self.processor1_queue.append(processor1.current_process.pid)
+                self.processor1_queue.append((processor1.current_process.pid,processor1.power_usage))
             else:
-                self.processor1_queue.append(0)
+                self.processor1_queue.append((0,processor1.power_usage))
 
             if processor2.current_process:
-                self.processor2_queue.append(processor2.current_process.pid)
+                self.processor2_queue.append((processor2.current_process.pid,processor2.power_usage))
             else:
-                self.processor2_queue.append(0)
+                self.processor2_queue.append((0,processor2.power_usage))
 
             if processor3.current_process:
-                self.processor3_queue.append(processor3.current_process.pid)
+                self.processor3_queue.append((processor3.current_process.pid, processor3.power_usage))
             else:
-                self.processor3_queue.append(0)
+                self.processor3_queue.append((0, processor3.power_usage))
 
 
 
