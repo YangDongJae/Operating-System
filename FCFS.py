@@ -7,8 +7,6 @@ class Process:
         self.count = 0  #프로세스에서 돈 시간 카운트
 
 
-
-
 class Processor:
     def __init__(self, processor_id, core_type: str):
         self.processor_id = processor_id
@@ -59,6 +57,7 @@ class FCFS(SchedulingAlgorithm):
         self.processor1_queue = []
         self.processor2_queue = []
         self.processor3_queue = []
+
         self.total_power_usage = []
                                             
     def add_process(self, process):         #프로세스 할당
@@ -77,21 +76,19 @@ class FCFS(SchedulingAlgorithm):
             if processor.current_process.remaining_time <= 0:
                 processor.current_process.waiting_time = (current_time - processor.current_process.arrival_time - processor.current_process.count + 1)
                 processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
-                processor.current_process.completed_time = current_time + 1
                 processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
-                self.completed_processes.append(processor.current_process)
+                self.completed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time,processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT))
                 processor.current_process = None
                      
                                                     
-                                            
     def schedule(self):                     #스케줄링 함수
         current_time = 0                    #현재 시간 0으로 지정
         processor0 = self.processors[0]     #0번째 프로세서
         processor1 = self.processors[1]     #1번째 프로세서
         processor2 = self.processors[2]     #2번째 프로세서
         processor3 = self.processors[3]     #3번째 프로세서
-        
-
+        self.ready_queue_list = []
+        self.list =[]
 
         while self.process_queue or self.ready_queue or processor0.current_process or processor1.current_process or processor2.current_process or processor3.current_process:
             #프로세스큐, 레디큐, 각 프로세스 별로 원소들이 존재하면 반복
@@ -100,7 +97,9 @@ class FCFS(SchedulingAlgorithm):
             for process in incoming_processes:      #AT=CT인 프로세스들을 큐에서 제거하고 레디큐로 내려보냄
                 self.process_queue.remove(process)  
                 self.ready_queue.append(process)
-          
+
+
+
             #각 코어에 할당, 비선점 할당
             if not processor0.current_process and not processor0.core_type == None and self.ready_queue:                 #0번째 프로세서에 존재x, 레디큐에 존재    
                 processor0.current_process = self.ready_queue.pop(0)
@@ -117,33 +116,12 @@ class FCFS(SchedulingAlgorithm):
             if not processor3.current_process and not processor3.core_type == None and self.ready_queue:
                 processor3.current_process = self.ready_queue.pop(0)
                 
-                    
-            
-            if processor0.current_process:
-                self.processor0_queue.append(processor0.current_process.pid)
-            else:
-                self.processor0_queue.append(0)
-
-            if processor1.current_process:
-                self.processor1_queue.append(processor1.current_process.pid)
-            else:
-                self.processor1_queue.append(0)
-
-            if processor2.current_process:
-                self.processor2_queue.append(processor2.current_process.pid)
-            else:
-                self.processor2_queue.append(0)
-
-            if processor3.current_process:
-                self.processor3_queue.append(processor3.current_process.pid)
-            else:
-                self.processor3_queue.append(0)
-            #프로세서 별로 전력 계산
 
             processor0.update_power_status(processor0)
             processor1.update_power_status(processor1)
             processor2.update_power_status(processor2)
-            processor3.update_power_status(processor3)
+            processor3.update_power_status(processor3)            
+  
 
             if processor0.current_process:
                 self.processor0_queue.append((processor0.current_process.pid,processor0.power_usage))
@@ -165,32 +143,30 @@ class FCFS(SchedulingAlgorithm):
             else:
                 self.processor3_queue.append((0, processor3.power_usage))
 
+            self.total_power_usage.append(processor0.power_usage + processor1.power_usage + processor2.power_usage + processor3.power_usage)
+
+            for i in self.ready_queue:
+                self.list.append(i.pid)
+            
+            self.ready_queue_list.append(self.list)
+            
+            self.list =[]
+
             #프로세스 처리 매 초마다
             self.update_current_process(processor0, current_time)
             self.update_current_process(processor1, current_time)
             self.update_current_process(processor2, current_time)
             self.update_current_process(processor3, current_time)
 
-            self.total_power_usage.append(processor0.power_usage + processor1.power_usage + processor2.power_usage + processor3.power_usage)
-
-            #한 주기 긑
+           
             current_time += 1
             
-    def print_results(self):
-        
-        print("Process ID | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time | NTT ")
-        for process in self.completed_processes:
-            print(f"{process.pid} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.NTT} ")
-        P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
-        E_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "E"])
-        print("P코어 총 전력 사용량:",P_cores_power_usage,"W")
-        print("E코어 총 전력 사용량:",E_cores_power_usage,"W")
-        print("총 전력 사용량:",self.total_power_usage ,"W")
-        print("프로세서 0에서 작업한 프로세스:", self.processor0_queue)
-        print("프로세서 1에서 작업한 프로세스:", self.processor1_queue)
-        print("프로세서 2에서 작업한 프로세스:", self.processor2_queue)
-        print("프로세서 3에서 작업한 프로세스:", self.processor3_queue)   
 
+    def print_results(self):
+
+        list =[self.processor0_queue,self.processor1_queue,self.processor2_queue,self.processor3_queue, self.total_power_usage , self.completed_processes, self.ready_queue_list]
+
+        return list
 
 class Main:
     def __init__(self, process_select_signal, processor_select_signal):
@@ -214,23 +190,20 @@ class Main:
         self.fcfs_algorithm.schedule()
 
     def print_result(self):
-        self.fcfs_algorithm.print_results()
+        return self.fcfs_algorithm.print_results()
             
 
-def main():
-    process_select_signal = [[1, 1, 6],
-                             [2, 12, 20],
-                             [3, 7, 3],
-                             [4, 16, 16],
-                             [5, 8 ,18],
-                             [6, 2, 8]]
+def main(Info =[]):
+    process_select_signal = Info[0]
 
-    processor_select_signal = [1, 1, 1, 1]
+    processor_select_signal = Info[1]
 
     main_program = Main(process_select_signal, processor_select_signal)
     main_program.create_process()
     main_program.run_scheduler()
-    main_program.print_result()
+
+    return main_program.print_result()
+
 
 
 if __name__ == "__main__":
