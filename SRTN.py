@@ -1,13 +1,10 @@
 class Process:
-    def __init__(self, pid, arrival_time, burst_time, completed_time):
+    def __init__(self, pid, arrival_time, burst_time):
         self.pid = pid
         self.arrival_time = arrival_time
         self.burst_time = burst_time
         self.remaining_time = burst_time
-        self.completed_time = completed_time
         self.count = 0  #프로세스에서 돈 시간 카운트
-        self.waiting_time = 0
-        self.turnaround_time = 0
 
 
 class Processor:
@@ -29,6 +26,7 @@ class Processor:
         else:
             if processor.power_on:
                 processor.power_on = False
+
 
 class SchedulingAlgorithm:
     def __init__(self, processor_select_signal):
@@ -55,13 +53,14 @@ class SRTN(SchedulingAlgorithm):
         self.process_queue = [] #프로세스 큐
         self.ready_queue = []   #레디 큐
         self.completed_processes = []   #료된 프로세스들 보관하는 리스트
-        self.outed_process=[]           #컷팅 프로세스
 
         self.processor0_queue = []
         self.processor1_queue = []
         self.processor2_queue = []
         self.processor3_queue = []
-                                            
+
+        self.total_power_usage = []   
+        
     def add_process(self, process):         #프로세스 할당
         self.process_queue.append(process)  #프로세스 큐에 프로세스 추가
         
@@ -79,8 +78,8 @@ class SRTN(SchedulingAlgorithm):
             if processor.current_process.remaining_time <= 0:
                 processor.current_process.waiting_time = (current_time - processor.current_process.arrival_time - processor.current_process.count + 1)
                 processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
-                processor.current_process.completed_time = current_time + 1
-                self.completed_processes.append(processor.current_process)
+                processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
+                self.completed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time,processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT))
                 processor.current_process = None
             elif processor.current_process.remaining_time > 0 and self.ready_queue: #시간 남아있고 레디큐에 존재하면
                     if processor.current_process.remaining_time > self.ready_queue[0].remaining_time:   #수정 부분
@@ -97,7 +96,8 @@ class SRTN(SchedulingAlgorithm):
         processor1 = self.processors[1]     #1번째 프로세서
         processor2 = self.processors[2]     #2번째 프로세서
         processor3 = self.processors[3]     #3번째 프로세서
-
+        self.ready_queue_list = []
+        self.list =[]
 
         while self.process_queue or self.ready_queue or processor0.current_process or processor1.current_process or processor2.current_process or processor3.current_process:
             #프로세스큐, 레디큐, 각 프로세스 별로 원소들이 존재하면 반복
@@ -124,32 +124,41 @@ class SRTN(SchedulingAlgorithm):
                         processor3.current_process = self.ready_queue.pop(0)
             
 
-            #프로세서 큐 할당
-            if processor0.current_process:
-                self.processor0_queue.append(processor0.current_process.pid)
-            else:
-                self.processor0_queue.append(0)
-
-            if processor1.current_process:
-                self.processor1_queue.append(processor1.current_process.pid)
-            else:
-                self.processor1_queue.append(0)
-
-            if processor2.current_process:
-                self.processor2_queue.append(processor2.current_process.pid)
-            else:
-                self.processor2_queue.append(0)
-
-            if processor3.current_process:
-                self.processor3_queue.append(processor3.current_process.pid)
-            else:
-                self.processor3_queue.append(0)
-
             #프로세서 별로 전력 계산
             processor0.update_power_status(processor0)
             processor1.update_power_status(processor1)
             processor2.update_power_status(processor2)
             processor3.update_power_status(processor3)
+
+
+            if processor0.current_process:
+                self.processor0_queue.append((processor0.current_process.pid,processor0.power_usage))
+            else:
+                self.processor0_queue.append((0,processor0.power_usage))
+
+            if processor1.current_process:
+                self.processor1_queue.append((processor1.current_process.pid,processor1.power_usage))
+            else:
+                self.processor1_queue.append((0,processor1.power_usage))
+
+            if processor2.current_process:
+                self.processor2_queue.append((processor2.current_process.pid,processor2.power_usage))
+            else:
+                self.processor2_queue.append((0,processor2.power_usage))
+
+            if processor3.current_process:
+                self.processor3_queue.append((processor3.current_process.pid, processor3.power_usage))
+            else:
+                self.processor3_queue.append((0, processor3.power_usage))
+
+            self.total_power_usage.append(processor0.power_usage + processor1.power_usage + processor2.power_usage + processor3.power_usage)
+
+            for i in self.ready_queue:
+                self.list.append(i.pid)
+            
+            self.ready_queue_list.append(self.list)
+            
+            self.list =[]
 
             #프로세스 처리 매 초마다
             self.update_current_process(processor0, current_time)
@@ -159,21 +168,14 @@ class SRTN(SchedulingAlgorithm):
             #프로세서0에 현재 프로세스가 있으면
             
             current_time += 1
+       
             
+
     def print_results(self):
         
-        print("Process ID | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time")
-        for process in self.completed_processes:
-            print(f"{process.pid} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time}")
-        P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
-        E_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "E"])
-        print("P코어 총 전력 사용량:",P_cores_power_usage,"W")
-        print("E코어 총 전력 사용량:",E_cores_power_usage,"W")
-        print("총 전력 사용량:",round(P_cores_power_usage+E_cores_power_usage, 1),"W")
-        print("프로세서 0에서 작업한 프로세스:", self.processor0_queue)
-        print("프로세서 1에서 작업한 프로세스:", self.processor1_queue)
-        print("프로세서 2에서 작업한 프로세스:", self.processor2_queue)
-        print("프로세서 3에서 작업한 프로세스:", self.processor3_queue)     
+        list =[self.processor0_queue,self.processor1_queue,self.processor2_queue,self.processor3_queue, self.total_power_usage , self.completed_processes, self.ready_queue_list]
+
+        return list
 
 
 class Main:
@@ -189,7 +191,7 @@ class Main:
             burst_time = i[2]
             completed_time = 0
 
-            process = Process(pid, arrival_time, burst_time, completed_time)
+            process = Process(pid, arrival_time, burst_time)
             self.processes.append(process)
 
     def run_scheduler(self):
@@ -198,32 +200,19 @@ class Main:
         self.srtn_algorithm.schedule()
 
     def print_result(self):
-        self.srtn_algorithm.print_results()
+        return self.srtn_algorithm.print_results()
             
 
-def main():
-    process_select_signal = [[1, 1, 6],
-                             [2, 12, 20],
-                             [3, 7, 3],
-                             [4, 16, 16],
-                             [5, 8 ,18,],
-                             [6, 2, 8],
-                             [7, 15, 6],
-                             [8, 7, 2],
-                             [9, 3, 1],
-                             [10, 0, 14],
-                             [11, 1, 12],
-                             [12, 13, 9],
-                             [13, 5, 24],
-                             [14, 4, 11],
-                             [15, 11, 10]]
+def main(Info =[]):
+    process_select_signal = Info[0]
 
-    processor_select_signal = [1, 1, 1, 1]
+    processor_select_signal = Info[1]
 
     main_program = Main(process_select_signal, processor_select_signal)
     main_program.create_process()
     main_program.run_scheduler()
-    main_program.print_result()
+
+    return main_program.print_result()
 
 
 if __name__ == "__main__":
