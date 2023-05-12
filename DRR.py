@@ -1,14 +1,11 @@
 class Process:
-    def __init__(self, pid, arrival_time, burst_time, completed_time, gpt_model, complexity, time_quantum):
+    def __init__(self, pid, arrival_time, burst_time, gpt_model, complexity, time_quantum):
         self.pid = pid
         self.arrival_time = arrival_time
         self.burst_time = burst_time
         self.remaining_time = burst_time
-        self.completed_time = completed_time
         self.count = 0
         self.waiting_time = 0
-        self.turnaround_time = 0
-        self.NTT = 0
         self.gpt_model = gpt_model
         self.complexity = complexity
         self.time_quantum = time_quantum
@@ -94,7 +91,7 @@ class DRR(SchedulingAlgorithm):
         processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
         processor.current_process.completed_time = current_time + 1
         processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
-        scheduler.outed_processes.append(processor.current_process)
+        scheduler.outed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time, processor.current_process.gpt_model, processor.current_process.complexity, processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT))
         processor.current_process = None
 
     def handle_completed_process(self, processor, scheduler, current_time):
@@ -102,7 +99,7 @@ class DRR(SchedulingAlgorithm):
         processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
         processor.current_process.completed_time = current_time + 1
         processor.current_process.NTT = round((processor.current_process.turnaround_time) / processor.current_process.count, 1)
-        scheduler.completed_processes.append(processor.current_process)
+        scheduler.completed_processes.append((processor.current_process.pid, processor.current_process.arrival_time, processor.current_process.burst_time, processor.current_process.gpt_model, processor.current_process.complexity, processor.current_process.waiting_time,processor.current_process.turnaround_time,processor.current_process.NTT))
         processor.current_process = None
 
     def handle_preempted_process(self, processor, scheduler):
@@ -135,12 +132,17 @@ class DRR(SchedulingAlgorithm):
         processor1 = self.processors[1]
         processor2 = self.processors[2]
         processor3 = self.processors[3]
+        self.ready_queue_list = []
+        self.list =[]
 
         while self.process_queue or self.ready_queue or processor0.current_process or processor1.current_process or processor2.current_process or processor3.current_process:
             incoming_processes = [proc for proc in self.process_queue if proc.arrival_time == current_time]
+
+
             for process in incoming_processes:
                 self.process_queue.remove(process)
                 self.ready_queue.append(process)
+
 
             if self.ready_queue:
                 for(lower, upper), quantum in self.time_quantum_table.items():
@@ -152,7 +154,13 @@ class DRR(SchedulingAlgorithm):
             self.assign_process_to_processor(processor1, self.processors, self.ready_queue)
             self.assign_process_to_processor(processor2, self.processors, self.ready_queue)
             self.assign_process_to_processor(processor3, self.processors, self.ready_queue)
+  
 
+            processor0.update_power_status(processor0)
+            processor1.update_power_status(processor1)
+            processor2.update_power_status(processor2)
+            processor3.update_power_status(processor3)
+         
             if processor0.current_process:
                 self.processor0_queue.append((processor0.current_process.pid,processor0.power_usage))
             else:
@@ -171,41 +179,29 @@ class DRR(SchedulingAlgorithm):
             if processor3.current_process:
                 self.processor3_queue.append((processor3.current_process.pid, processor3.power_usage))
             else:
-                self.processor3_queue.append((0, processor3.power_usage))  
-
-            processor0.update_power_status(processor0)
-            processor1.update_power_status(processor1)
-            processor2.update_power_status(processor2)
-            processor3.update_power_status(processor3)
-          
+                self.processor3_queue.append((0, processor3.power_usage))
 
             self.total_power_usage.append(processor0.power_usage + processor1.power_usage + processor2.power_usage + processor3.power_usage)
+
+            for i in self.ready_queue:
+                self.list.append(i.pid)
+            
+            self.ready_queue_list.append(self.list)
+            
+            self.list =[]
 
             self.update_current_process(processor0, self, current_time)
             self.update_current_process(processor1, self, current_time)
             self.update_current_process(processor2, self, current_time)
             self.update_current_process(processor3, self, current_time)
-
+        
 
             current_time += 1
 
     def print_results(self):
-        print("Process ID | GPT Model | Complexity | Arrival Time | Burst Time | Waiting Time | Turnaround Time | Completed Time | NTT | Working Time")
-        for process in self.completed_processes:
-            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} |  {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.NTT} | {process.count}")
-        print("<아웃된 프로세스>")
-        for process in self.outed_processes:
-            print(f"{process.pid} | {process.gpt_model} | {process.complexity} | {process.arrival_time} | {process.burst_time} | {process.waiting_time} | {process.turnaround_time} | {process.completed_time} | {process.NTT} | {process.count}")
-        P_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "P"])
-        E_cores_power_usage = sum([processor.power_usage for processor in self.processors if processor.core_type == "E"])
-        print("P코어 총 전력 사용량:",round(P_cores_power_usage, 1),"W")
-        print("E코어 총 전력 사용량:",round(E_cores_power_usage, 1),"W")
-        print("총 전력 사용량:",self.total_power_usage,"W")
-        print("프로세서 0에서 작업한 프로세스:", self.processor0_queue)
-        print("프로세서 1에서 작업한 프로세스:", self.processor1_queue)
-        print("프로세서 2에서 작업한 프로세스:", self.processor2_queue)
-        print("프로세서 3에서 작업한 프로세스:", self.processor3_queue)
+        list =[self.processor0_queue, self.processor1_queue,self.processor2_queue, self.processor3_queue, self.total_power_usage, self.completed_processes, self.outed_processes, self.ready_queue_list]
 
+        return list
 
 class Main:
     def __init__(self, process_select_signal, processor_select_signal):
@@ -225,7 +221,7 @@ class Main:
             time_quantum = 0
             completed_time = 0
 
-            process = Process(pid, arrival_time, burst_time, completed_time, gpt_model, complexity, time_quantum)
+            process = Process(pid, arrival_time, burst_time, gpt_model, complexity, time_quantum)
             self.processes.append(process)
 
     def run_scheduler(self):
@@ -234,22 +230,18 @@ class Main:
         self.drr_algorithm.schedule()
 
     def print_result(self):
-        self.drr_algorithm.print_results()
+        return self.drr_algorithm.print_results()
 
 
-def main():
-    process_select_signal = [[1, 0, 10, "GPT 4", 5],
-                             [2, 0, 10, "GPT 4", 5],
-                             [3, 0, 10, "GPT 4", 5],
-                             [4, 0, 10, "GPT 4", 5],
-                             [5, 0 , 10, "GPT 4", 5]]
+def main(Info =[]):
+    process_select_signal = Info[0]
 
-    processor_select_signal = [1, 1, 1, 2]
+    processor_select_signal = Info[1]
 
     main_program = Main(process_select_signal, processor_select_signal)
     main_program.create_process()
     main_program.run_scheduler()
-    main_program.print_result()
+    return main_program.print_result()
 
 
 if __name__ == "__main__":
