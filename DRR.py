@@ -106,7 +106,8 @@ class DRR(SchedulingAlgorithm):
         scheduler.ready_queue.append(processor.current_process)
         processor.current_process = None
                 
-    def update_power_usage(self,processor):
+    
+    def update_current_process(self,processor, scheduler, current_time):
         if processor.current_process:
             processor.current_process.count += 1
             if processor.core_type == "P":
@@ -115,9 +116,6 @@ class DRR(SchedulingAlgorithm):
             elif processor.core_type == "E":
                 processor.current_process.remaining_time -= 1
                 processor.power_usage += 1
-        
-    def update_current_process(self,processor, scheduler, current_time):
-        if processor.current_process:
             if processor.current_process.count >= 10:
                 self.handle_outed_process(processor, scheduler, current_time)
             elif processor.current_process.remaining_time <= 0:
@@ -162,10 +160,6 @@ class DRR(SchedulingAlgorithm):
             processor2.update_power_status(processor2)
             processor3.update_power_status(processor3)
 
-            processor0.update_power_usage(processor0)
-            processor1.update_power_usage(processor1)
-            processor2.update_power_usage(processor2)
-            processor3.update_power_usage(processor3)
          
             if processor0.current_process:
                 self.processor0_queue.append((processor0.current_process.pid,processor0.power_usage))
