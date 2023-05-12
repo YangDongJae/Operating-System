@@ -65,7 +65,10 @@ class RR(SchedulingAlgorithm):
     def add_process(self, process):         #프로세스 할당
         self.process_queue.append(process)  #프로세스 큐에 프로세스 추가
 
-    def update_power_usage(self,processor):
+
+
+        
+    def update_current_process(self,processor,current_time):
         if processor.current_process:
             processor.current_process.count += 1
             if processor.core_type == "P":
@@ -74,9 +77,6 @@ class RR(SchedulingAlgorithm):
             elif processor.core_type == "E":
                 processor.current_process.remaining_time -= 1
                 processor.power_usage += 1
-        
-    def update_current_process(self,processor,current_time):
-        if processor.current_process:
             if processor.current_process.remaining_time <= 0:
                 processor.current_process.waiting_time = (current_time - processor.current_process.arrival_time - processor.current_process.count + 1)
                 processor.current_process.turnaround_time = (processor.current_process.waiting_time + processor.current_process.count)
@@ -126,10 +126,6 @@ class RR(SchedulingAlgorithm):
             processor2.update_power_status(processor2)
             processor3.update_power_status(processor3)            
 
-            processor0.update_power_usage(processor0)
-            processor1.update_power_usage(processor1)
-            processor2.update_power_usage(processor2)
-            processor3.update_power_usage(processor3)
 
             #프로세서 큐 할당
             if processor0.current_process:
@@ -205,7 +201,7 @@ class Main:
             
 
 def main(Info =[]):
-    time_quantum = Info[3]
+    time_quantum = Info[-1]
 
     process_select_signal = Info[0]
 
